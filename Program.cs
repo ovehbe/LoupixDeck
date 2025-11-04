@@ -135,9 +135,11 @@ sealed class Program
             {
                 "off" => ExecuteDeviceCommand("System.DeviceOff"),
                 "on" => ExecuteDeviceCommand("System.DeviceOn"),
+                "on-off" => ExecuteDeviceCommand("System.DeviceToggle"),
+                "wakeup" => ExecuteDeviceCommand("System.DeviceWakeup"),
                 "toggle" or "show" or "hide" => ExecuteDeviceCommand("System.ToggleWindow"),
                 "quit" => ExecuteQuit(),
-                _ => "Unknown command. Available: on, off, toggle, show, hide, quit"
+                _ => "Unknown command. Available: on, off, on-off, wakeup, toggle, show, hide, quit"
             };
             
             var responseBytes = System.Text.Encoding.UTF8.GetBytes(response);

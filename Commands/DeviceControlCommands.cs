@@ -59,3 +59,53 @@ public class ToggleWindowCommand() : IExecutableCommand
     }
 }
 
+[Command("System.DeviceToggle", "Device Toggle ON/OFF", "Device Control")]
+public class DeviceToggleCommand(IDeviceController controller) : IExecutableCommand
+{
+    public async Task Execute(string[] parameters)
+    {
+        Console.WriteLine("Device Toggle command triggered");
+        
+        if (controller.IsDeviceOff())
+        {
+            Console.WriteLine("Device is OFF, turning ON...");
+            await controller.RestoreDeviceState();
+            Console.WriteLine("Device turned ON");
+        }
+        else
+        {
+            Console.WriteLine("Device is ON, turning OFF...");
+            await controller.ClearDeviceState();
+            Console.WriteLine("Device turned OFF");
+        }
+    }
+}
+
+[Command("System.DeviceWakeup", "Device Wakeup (Reconnect & ON)", "Device Control")]
+public class DeviceWakeupCommand(IDeviceController controller) : IExecutableCommand
+{
+    public async Task Execute(string[] parameters)
+    {
+        Console.WriteLine("Device Wakeup command triggered");
+        
+        try
+        {
+            // Reconnect the device
+            await controller.Reconnect();
+            
+            // Wait a moment for connection to stabilize
+            await Task.Delay(500);
+            
+            // Turn device ON
+            await controller.RestoreDeviceState();
+            
+            Console.WriteLine("Device wakeup complete - reconnected and turned ON");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Device wakeup failed: {ex.Message}");
+            throw;
+        }
+    }
+}
+

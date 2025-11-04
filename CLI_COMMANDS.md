@@ -32,7 +32,19 @@ dotnet run
 ```
 **Effect**: Reloads `config_razer.json` - restores brightness, buttons, everything
 
-### 3. Toggle Window Visibility
+### 3. Device ON/OFF Toggle
+```bash
+./loupixdeck-cli on-off
+```
+**Effect**: Toggles device state - if OFF turns ON, if ON turns OFF
+
+### 4. Device Wakeup (Reconnect)
+```bash
+./loupixdeck-cli wakeup
+```
+**Effect**: Reconnects the device (useful after system suspend/resume) and turns it ON
+
+### 5. Toggle Window Visibility
 ```bash
 ./loupixdeck-cli toggle
 # or
@@ -42,7 +54,7 @@ dotnet run
 ```
 **Effect**: Shows window if hidden, hides if shown
 
-### 4. Quit Application
+### 6. Quit Application
 ```bash
 ./loupixdeck-cli quit
 ```
@@ -63,6 +75,12 @@ dotnet run
 **Turn on device when unlocking:**
 ```bash
 ./loupixdeck-cli on
+```
+
+**Reconnect device after system suspend/resume:**
+```bash
+# Add to wakeup script or systemd resume service
+./loupixdeck-cli wakeup
 ```
 
 ### Keyboard Shortcuts
@@ -107,7 +125,7 @@ systemctl --user start loupixdeck
 All commands return a response:
 - `OK: System.DeviceOff executed` - Command successful
 - `ERROR: ...` - Command failed
-- `Unknown command. Available: on, off, toggle, show, hide, quit` - Invalid command
+- `Unknown command. Available: on, off, on-off, wakeup, toggle, show, hide, quit` - Invalid command
 
 ---
 
@@ -162,6 +180,8 @@ loupixdeck on
 **While app is running**, control it from terminal:
 - `./loupixdeck-cli on` - Turn device ON
 - `./loupixdeck-cli off` - Turn device OFF
+- `./loupixdeck-cli on-off` - Toggle device ON/OFF
+- `./loupixdeck-cli wakeup` - Reconnect device and turn ON (for suspend/resume)
 - `./loupixdeck-cli toggle` - Show/Hide window
 - `./loupixdeck-cli quit` - Exit app (with device clear)
 

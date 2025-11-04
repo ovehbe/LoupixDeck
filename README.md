@@ -201,8 +201,10 @@ dotnet run
 
 **Device Control:**
 ```bash
-./loupixdeck-cli off   # Turn device OFF (brightness=0, LEDs black, screen clears)
-./loupixdeck-cli on    # Turn device ON (restore brightness, LEDs, graphics)
+./loupixdeck-cli off      # Turn device OFF (brightness=0, LEDs black, screen clears)
+./loupixdeck-cli on       # Turn device ON (restore brightness, LEDs, graphics)
+./loupixdeck-cli on-off   # Toggle device ON/OFF
+./loupixdeck-cli wakeup   # Reconnect device and turn ON (for suspend/resume)
 ```
 
 **Window Control:**

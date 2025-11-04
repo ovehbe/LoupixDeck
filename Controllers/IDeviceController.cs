@@ -14,5 +14,7 @@ public interface IDeviceController
     void SaveConfig();
     Task ClearDeviceState();
     Task RestoreDeviceState();
+    bool IsDeviceOff();
+    Task Reconnect();
 }
 

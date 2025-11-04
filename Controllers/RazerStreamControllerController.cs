@@ -61,6 +61,9 @@ public class RazerStreamControllerController(
             config.TouchFeedbackEnabled = savedConfig.TouchFeedbackEnabled;
             config.TouchFeedbackColor = savedConfig.TouchFeedbackColor;
             config.TouchFeedbackOpacity = savedConfig.TouchFeedbackOpacity;
+            
+            // Detect and update port AFTER all properties are loaded (handles port changes after suspend/disconnect)
+            DetectAndUpdatePort();
         }
         else
         {
@@ -75,6 +78,9 @@ public class RazerStreamControllerController(
             Config.DeviceRows = 3;
             Config.DeviceTouchButtonCount = 14;
             Config.DeviceRotaryCount = 6;
+            
+            // Detect and update port AFTER config is set up
+            DetectAndUpdatePort();
         }
 
         // Start the device using the configuration
@@ -540,6 +546,101 @@ public class RazerStreamControllerController(
         }
     }
 
+    private void UpdatePortInConfigFile(string configPath, string newPort)
+    {
+        try
+        {
+            if (!File.Exists(configPath))
+            {
+                Console.WriteLine($"Config file not found: {configPath}");
+                return;
+            }
+            
+            // Read the config file as text
+            var jsonText = File.ReadAllText(configPath);
+            
+            // Parse as JSON
+            var jsonDoc = System.Text.Json.JsonDocument.Parse(jsonText);
+            var root = jsonDoc.RootElement;
+            
+            // Create a dictionary from the JSON
+            var configDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonText);
+            
+            if (configDict != null)
+            {
+                // Update ONLY the DevicePort field
+                if (configDict.ContainsKey("DevicePort"))
+                {
+                    configDict["DevicePort"] = newPort;
+                }
+                else
+                {
+                    configDict.Add("DevicePort", newPort);
+                }
+                
+                // Write back with pretty formatting
+                var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                var updatedJson = System.Text.Json.JsonSerializer.Serialize(configDict, options);
+                File.WriteAllText(configPath, updatedJson);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating port in config file {configPath}: {ex.Message}");
+        }
+    }
+    
+    private void DetectAndUpdatePort()
+    {
+        try
+        {
+            // Only attempt detection if we have VID/PID to search for
+            if (string.IsNullOrEmpty(config.DeviceVid) || string.IsNullOrEmpty(config.DevicePid))
+            {
+                Console.WriteLine("No VID/PID in config, skipping port detection");
+                return;
+            }
+            
+            Console.WriteLine($"Detecting device port for VID={config.DeviceVid}, PID={config.DevicePid}...");
+            
+            var devices = SerialDeviceHelper.ListSerialUsbDevices();
+            var matchingDevice = devices.FirstOrDefault(d => 
+                d.Vid?.ToLower() == config.DeviceVid.ToLower() && 
+                d.Pid?.ToLower() == config.DevicePid.ToLower());
+            
+            if (matchingDevice != null && !string.IsNullOrEmpty(matchingDevice.DevNode))
+            {
+                if (matchingDevice.DevNode != config.DevicePort)
+                {
+                    Console.WriteLine($"Port changed: {config.DevicePort} -> {matchingDevice.DevNode}");
+                    
+                    // Update port in memory
+                    var oldPort = config.DevicePort;
+                    config.DevicePort = matchingDevice.DevNode;
+                    
+                    // Update ONLY the port field in the config files (don't overwrite other settings)
+                    UpdatePortInConfigFile(_configPath, matchingDevice.DevNode);
+                    UpdatePortInConfigFile(_offConfigPath, matchingDevice.DevNode);
+                    
+                    Console.WriteLine($"Updated port in both config files: {oldPort} -> {matchingDevice.DevNode}");
+                }
+                else
+                {
+                    Console.WriteLine($"Port unchanged: {config.DevicePort}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Device not found - using configured port: {config.DevicePort}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error detecting port: {ex.Message}");
+            // Continue with existing port on error
+        }
+    }
+    
     private void InitializeConfigFiles()
     {
         // Create OFF config if it doesn't exist (never overwrite)
@@ -696,6 +797,41 @@ public class RazerStreamControllerController(
         }
         
         Console.WriteLine("Device state fully restored!");
+    }
+    
+    public bool IsDeviceOff()
+    {
+        return _isDeviceOff;
+    }
+    
+    public async Task Reconnect()
+    {
+        Console.WriteLine("Reconnecting device...");
+        
+        try
+        {
+            // Detect and update port before reconnecting (handles port changes)
+            DetectAndUpdatePort();
+            
+            // Restart the device connection
+            deviceService.StartDevice(config.DevicePort, config.DeviceBaudrate, config.DeviceVid, config.DevicePid);
+            
+            // Wait a moment for the connection to establish
+            await Task.Delay(500);
+            
+            // Re-register event handlers
+            var device = deviceService.Device;
+            device.OnButton += OnSimpleButtonPress;
+            device.OnTouch += OnTouchButtonPress;
+            device.OnRotate += OnRotate;
+            
+            Console.WriteLine("Device reconnected successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reconnecting device: {ex.Message}");
+            throw;
+        }
     }
 }
 
