@@ -9,7 +9,7 @@
     xmlns:vm="using:LoupixDeck.ViewModels"
     x:DataType="vm:TouchButtonSettingsViewModel"
     Title="TouchButtonSettings"
-    Height="500"
+    Height="650"
     Width="900"
     mc:Ignorable="d"
     SystemDecorations="Full"
