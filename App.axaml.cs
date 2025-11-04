@@ -98,29 +98,40 @@ public partial class App : Application
         var collection = new ServiceCollection();
         collection.AddCommonServices();
 
-        var services = collection.BuildServiceProvider();
-
-        services.PostInit();
-
-        // Determine which controller to use based on VID/PID
+        // Determine which controller to register based on VID/PID BEFORE building services
         Controllers.IDeviceController controller;
         if (!string.IsNullOrEmpty(vid) && !string.IsNullOrEmpty(pid))
         {
             var deviceInfo = Registry.DeviceRegistry.GetDeviceByVidPid(vid, pid);
             if (deviceInfo?.Name == "Razer Stream Controller")
             {
-                controller = services.GetRequiredService<Controllers.RazerStreamControllerController>();
+                // Register Razer controller as IDeviceController
+                collection.AddSingleton<Controllers.IDeviceController>(sp => 
+                    sp.GetRequiredService<Controllers.RazerStreamControllerController>());
             }
             else
             {
-                controller = services.GetRequiredService<Controllers.LoupedeckLiveSController>();
+                // Register Live S controller as IDeviceController
+                collection.AddSingleton<Controllers.IDeviceController>(sp => 
+                    sp.GetRequiredService<Controllers.LoupedeckLiveSController>());
             }
         }
         else
         {
-            // Default to Loupedeck Live S for backward compatibility
-            controller = services.GetRequiredService<Controllers.LoupedeckLiveSController>();
+            // Default to Loupedeck Live S
+            collection.AddSingleton<Controllers.IDeviceController>(sp => 
+                sp.GetRequiredService<Controllers.LoupedeckLiveSController>());
         }
+
+        var services = collection.BuildServiceProvider();
+        
+        // Store services for CLI access
+        Program.AppServices = services;
+
+        services.PostInit();
+
+        // Get the registered controller
+        controller = services.GetRequiredService<Controllers.IDeviceController>();
 
         // Create MainWindowViewModel with the selected controller
         var dialogService = services.GetRequiredService<Services.IDialogService>();

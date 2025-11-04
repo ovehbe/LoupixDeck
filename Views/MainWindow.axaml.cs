@@ -44,7 +44,10 @@ public partial class MainWindow : Window
 
     private void OnWindowClosing(object sender, WindowClosingEventArgs e)
     {
-        // X button quits the app normally
-        ViewModel?.QuitApplication();
+        // X button only hides window (doesn't quit)
+        // Only Quit from hamburger menu actually exits
+        e.Cancel = true;
+        Console.WriteLine("X button pressed - hiding window (use Menu → Quit to exit)");
+        Hide();
     }
 }

@@ -9,6 +9,7 @@ sealed class Program
 #if !WINDOWS
     private const string SocketPath = "/tmp/loupixdeck_app.sock";
     private static Socket _listenerSocket;
+    public static IServiceProvider AppServices { get; set; }
 #else
     private const string MutexName = "LoupixDeck_Mutex";
     private static bool _mutexOwned;
@@ -21,21 +22,23 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // Handle CLI commands if arguments provided
+        if (args.Length > 0)
+        {
+            HandleCliCommand(args);
+            return;
+        }
+
 #if !WINDOWS
         {
             if (File.Exists(SocketPath))
             {
-                // App is already running - send toggle command
+                // App is already running - just notify
                 try
                 {
                     using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
                     client.Connect(new UnixDomainSocketEndPoint(SocketPath));
-                    
-                    // Send toggle command
-                    var message = System.Text.Encoding.UTF8.GetBytes("TOGGLE");
-                    client.Send(message);
-                    
-                    Console.WriteLine("Toggle command sent to running instance.");
+                    Console.WriteLine("Already running.");
                     return;
                 }
                 catch (SocketException)
@@ -72,6 +75,36 @@ sealed class Program
     }
 
 #if !WINDOWS
+    private static void HandleCliCommand(string[] args)
+    {
+        if (!File.Exists(SocketPath))
+        {
+            Console.WriteLine("LoupixDeck is not running. Start it first with: dotnet run");
+            Environment.Exit(1);
+            return;
+        }
+
+        try
+        {
+            using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+            client.Connect(new UnixDomainSocketEndPoint(SocketPath));
+            
+            var command = args[0].ToLower();
+            var message = System.Text.Encoding.UTF8.GetBytes(command);
+            client.Send(message);
+            
+            var buffer = new byte[1024];
+            var received = client.Receive(buffer);
+            var response = System.Text.Encoding.UTF8.GetString(buffer, 0, received);
+            Console.WriteLine(response);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Environment.Exit(1);
+        }
+    }
+
     private static void ListenForCommands()
     {
         try
@@ -79,26 +112,77 @@ sealed class Program
             while (true)
             {
                 var clientSocket = _listenerSocket.Accept();
-                var buffer = new byte[1024];
-                var bytesRead = clientSocket.Receive(buffer);
-                var message = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                
-                if (message == "TOGGLE")
-                {
-                    Console.WriteLine("Received TOGGLE command");
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                    {
-                        Views.MainWindow.ToggleVisibility();
-                    });
-                }
-                
-                clientSocket.Close();
+                Task.Run(() => HandleClientCommand(clientSocket));
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Command listener error: {ex.Message}");
         }
+    }
+
+    private static void HandleClientCommand(Socket client)
+    {
+        try
+        {
+            var buffer = new byte[1024];
+            var bytesRead = client.Receive(buffer);
+            var command = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim().ToLower();
+            
+            Console.WriteLine($"Received CLI command: {command}");
+            
+            string response = command switch
+            {
+                "off" => ExecuteDeviceCommand("System.DeviceOff"),
+                "on" => ExecuteDeviceCommand("System.DeviceOn"),
+                "toggle" or "show" or "hide" => ExecuteDeviceCommand("System.ToggleWindow"),
+                "quit" => ExecuteQuit(),
+                _ => "Unknown command. Available: on, off, toggle, show, hide, quit"
+            };
+            
+            var responseBytes = System.Text.Encoding.UTF8.GetBytes(response);
+            client.Send(responseBytes);
+            client.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling command: {ex.Message}");
+        }
+    }
+
+    private static string ExecuteDeviceCommand(string commandName)
+    {
+        try
+        {
+            var commandService = AppServices?.GetService(typeof(Services.ICommandService)) as Services.ICommandService;
+            
+            if (commandService != null)
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+                {
+                    await commandService.ExecuteCommand(commandName);
+                });
+                return $"OK: {commandName} executed";
+            }
+            return "ERROR: Command service not available";
+        }
+        catch (Exception ex)
+        {
+            return $"ERROR: {ex.Message}";
+        }
+    }
+
+    private static string ExecuteQuit()
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var mainWindow = Utils.WindowHelper.GetMainWindow();
+            if (mainWindow?.DataContext is ViewModels.MainWindowViewModel vm)
+            {
+                vm.QuitApplication();
+            }
+        });
+        return "OK: Quitting...";
     }
 #endif
 

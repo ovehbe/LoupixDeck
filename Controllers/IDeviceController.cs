@@ -13,5 +13,6 @@ public interface IDeviceController
     Task Initialize(string port = null, int baudrate = 0);
     void SaveConfig();
     Task ClearDeviceState();
+    Task RestoreDeviceState();
 }
 

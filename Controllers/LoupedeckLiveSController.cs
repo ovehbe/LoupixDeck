@@ -381,4 +381,38 @@ public class LoupedeckLiveSController(
             Console.WriteLine($"Error clearing device state: {ex.Message}");
         }
     }
+
+    public async Task RestoreDeviceState()
+    {
+        Console.WriteLine("Restoring device state from current config...");
+        
+        // Restore brightness
+        await deviceService.Device.SetBrightness(config.Brightness / 100.0);
+        Console.WriteLine($"Brightness restored to {config.Brightness}");
+        
+        // Restore button LED colors
+        if (config.SimpleButtons != null)
+        {
+            foreach (var button in config.SimpleButtons)
+            {
+                await deviceService.Device.SetButtonColor(button.Id, button.ButtonColor);
+            }
+            Console.WriteLine($"Restored {config.SimpleButtons.Length} button LEDs");
+        }
+        
+        // EXPLICITLY re-render all touch buttons (same as initial load)
+        if (config.TouchButtonPages != null && config.TouchButtonPages.Count > 0)
+        {
+            var touchButtons = config.CurrentTouchButtonPage.TouchButtons;
+            Console.WriteLine($"Rendering {touchButtons.Count} touch buttons...");
+            
+            foreach (var touchButton in touchButtons)
+            {
+                await deviceService.Device.DrawTouchButton(touchButton, config, true, config.DeviceColumns);
+            }
+            Console.WriteLine("All touch buttons rendered");
+        }
+        
+        Console.WriteLine("Device state fully restored!");
+    }
 }

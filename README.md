@@ -185,29 +185,63 @@ Configure them like any other button, but use the **Rotation** slider in setting
 
 ---
 
-## ⌨️ Window Toggle (Hide/Show)
+## 💻 CLI Commands
 
-The app runs as a single instance. Running it again while it's already running will **toggle window visibility** (show/hide).
+Control your device from the terminal while the app is running!
 
-### Toggle Command:
+### Start the App First:
 ```bash
-# Development build
-/path/to/LoupixDeck/bin/Debug/net9.0/LoupixDeck
-
-# Release build
-/path/to/LoupixDeck/publish/linux-x64/LoupixDeck
+dotnet run
+# Or published version:
+~/Applications/LoupixDeck/LoupixDeck
 ```
 
-### Setting Up Keyboard Shortcut (Elementary OS):
+### Available Commands:
+
+**Device Control:**
+```bash
+./loupixdeck-cli off   # Turn device OFF (brightness=0, LEDs black, screen clears)
+./loupixdeck-cli on    # Turn device ON (restore brightness, LEDs, graphics)
+```
+
+**Window Control:**
+```bash
+./loupixdeck-cli toggle   # Toggle window show/hide
+./loupixdeck-cli show     # Show window
+./loupixdeck-cli hide     # Hide window
+```
+
+**App Control:**
+```bash
+./loupixdeck-cli quit     # Exit app (applies OFF config first)
+```
+
+### X Button Behavior:
+- **X button** on window: **Hides** window (app keeps running)
+- **To actually quit**: Use hamburger menu → Quit
+
+### In-App Commands (Assign to Buttons):
+You can also assign these commands to physical buttons or touch buttons:
+- `System.DeviceOff` - Turn device OFF
+- `System.DeviceOn` - Turn device ON
+- `System.ToggleWindow` - Show/hide GUI window
+
+### Example: Create Keyboard Shortcuts
+
+**Elementary OS / Pantheon:**
 1. System Settings → Keyboard → Shortcuts → Custom
-2. Click **+** to add new shortcut
-3. **Name**: Toggle LoupixDeck
-4. **Command**: Full path to LoupixDeck executable
-5. **Shortcut**: Press your preferred keys (e.g., `Super+L` or `Ctrl+Alt+L`)
+2. Add shortcuts:
+   - **Super+D**: `~/Applications/LoupixDeck/LoupixDeck off`
+   - **Super+Shift+D**: `~/Applications/LoupixDeck/LoupixDeck on`
+   - **Super+L**: `~/Applications/LoupixDeck/LoupixDeck toggle`
 
-Now you can hide the window and bring it back instantly with your keyboard shortcut! The app stays running in the background keeping your device active.
+**Any Linux DE:**
+Bind to your preferred keys - perfect for quickly turning off your device when locking screen or going AFK!
 
-**Note**: System tray icon is not implemented due to Avalonia framework limitations with AppIndicator3 on Elementary OS.
+### Socket Communication:
+Commands communicate via Unix socket: `/tmp/loupixdeck_app.sock`
+
+**Note**: Tray icon disabled due to compatibility issues with some desktop environments.
 
 ---
 
@@ -223,12 +257,15 @@ This fork adds comprehensive support for the **Razer Stream Controller**:
 - Unified 480×270 display rendering
 
 ### New Features
-- **Visual touch feedback**: Configurable flash animation on button press
+- **Visual touch feedback**: Configurable flash animation on button press (Settings → General)
 - **Rotation control**: Rotate content on narrow displays (0°/90°/180°/270°)
 - **Template-based config**: Clean initial setup with default layouts
-- **Power management**: Auto-clear device on exit/suspend
-- **Smart config loading**: Preserves settings between runs
+- **Power management**: Auto-clear device on exit
+- **Smart config loading**: Preserves settings between runs (no overwrites)
 - **Device-specific configs**: No conflicts when using multiple devices
+- **CLI Commands**: Control device from terminal (`on`, `off`, `toggle`, etc.)
+- **Window management**: X button hides window, Quit from menu exits
+- **Device state management**: OFF/ON configs for clean power cycling
 
 ### Technical Improvements
 - Dynamic UI layout (adapts to device type)

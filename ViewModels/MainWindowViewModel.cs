@@ -44,10 +44,10 @@ public class MainWindowViewModel : ViewModelBase
 
         sysCommandService.Initialize();
         
-        // Listen for suspend/resume events
-        powerService.Suspending += OnSystemSuspending;
-        powerService.Resuming += OnSystemResuming;
-        powerService.StartMonitoring();
+        // Suspend/resume monitoring disabled (manual commands available instead)
+        // powerService.Suspending += OnSystemSuspending;
+        // powerService.Resuming += OnSystemResuming;
+        // powerService.StartMonitoring();
 
         _dialogService = dialogService;
 

@@ -1,0 +1,18 @@
+#!/bin/bash
+# LoupixDeck CLI Wrapper
+# Usage: ./loupixdeck-cli <command>
+
+BINARY_PATH="bin/Debug/net9.0/LoupixDeck"
+
+# If running from different directory, adjust path
+if [ ! -f "$BINARY_PATH" ]; then
+    BINARY_PATH="$(dirname "$0")/bin/Debug/net9.0/LoupixDeck"
+fi
+
+if [ ! -f "$BINARY_PATH" ]; then
+    echo "Error: LoupixDeck binary not found. Run 'dotnet build' first."
+    exit 1
+fi
+
+"$BINARY_PATH" "$@"
+
