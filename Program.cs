@@ -89,8 +89,12 @@ sealed class Program
             using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             client.Connect(new UnixDomainSocketEndPoint(SocketPath));
             
-            // Join all arguments into a single command string
-            var command = string.Join(" ", args).ToLower();
+            // Only lowercase the first argument (command name), keep rest as-is for case-sensitive values
+            var command = args.Length > 0 ? args[0].ToLower() : "";
+            if (args.Length > 1)
+            {
+                command += " " + string.Join(" ", args.Skip(1));
+            }
             var message = System.Text.Encoding.UTF8.GetBytes(command);
             client.Send(message);
             
@@ -128,32 +132,36 @@ sealed class Program
         {
             var buffer = new byte[1024];
             var bytesRead = client.Receive(buffer);
-            var command = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim().ToLower();
+            var fullCommand = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
             
-            Console.WriteLine($"Received CLI command: {command}");
+            Console.WriteLine($"Received CLI command: {fullCommand}");
+            
+            // Extract command name (first word) in lowercase, keep rest as-is for case sensitivity
+            var parts = fullCommand.Split(' ', 2);
+            var commandName = parts[0].ToLower();
+            var commandArgs = parts.Length > 1 ? parts[1] : "";
             
             string response;
             
             // Handle updateButton command with parameters
-            if (command.StartsWith("updatebutton "))
+            if (commandName == "updatebutton" && !string.IsNullOrEmpty(commandArgs))
             {
-                var args = command.Substring(13).Trim(); // Remove "updatebutton "
                 // Replace spaces with commas for parameter format: "6 text=hello" -> "6,text=hello"
-                args = args.Replace(" ", ",");
+                var args = commandArgs.Replace(" ", ",");
                 response = ExecuteDeviceCommand($"System.UpdateButton({args})");
             }
             // Handle page commands (page1, page2, rotarypage1, etc.)
-            else if (command.StartsWith("page") && int.TryParse(command.Substring(4), out int touchPageNum))
+            else if (commandName.StartsWith("page") && int.TryParse(commandName.Substring(4), out int touchPageNum))
             {
                 response = ExecuteDeviceCommand($"System.GotoPage({touchPageNum})");
             }
-            else if (command.StartsWith("rotarypage") && int.TryParse(command.Substring(10), out int rotaryPageNum))
+            else if (commandName.StartsWith("rotarypage") && int.TryParse(commandName.Substring(10), out int rotaryPageNum))
             {
                 response = ExecuteDeviceCommand($"System.GotoRotaryPage({rotaryPageNum})");
             }
             else
             {
-                response = command switch
+                response = commandName switch
                 {
                     "off" => ExecuteDeviceCommand("System.DeviceOff"),
                     "on" => ExecuteDeviceCommand("System.DeviceOn"),
