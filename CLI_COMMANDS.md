@@ -54,7 +54,32 @@ dotnet run
 ```
 **Effect**: Shows window if hidden, hides if shown
 
-### 6. Quit Application
+### 6. Page Navigation
+
+**Go to Specific Touch Page:**
+```bash
+./loupixdeck-cli page1    # Go to touch page 1
+./loupixdeck-cli page2    # Go to touch page 2
+./loupixdeck-cli page3    # Go to touch page 3
+# etc...
+```
+
+**Go to Specific Rotary Page:**
+```bash
+./loupixdeck-cli rotaryPage1    # Go to rotary page 1
+./loupixdeck-cli rotaryPage2    # Go to rotary page 2
+# etc...
+```
+
+**Navigate Pages:**
+```bash
+./loupixdeck-cli nextPage           # Next touch page
+./loupixdeck-cli previousPage       # Previous touch page
+./loupixdeck-cli nextRotaryPage     # Next rotary page
+./loupixdeck-cli previousRotaryPage # Previous rotary page
+```
+
+### 7. Quit Application
 ```bash
 ./loupixdeck-cli quit
 ```
@@ -123,9 +148,9 @@ systemctl --user start loupixdeck
 ## Response Messages
 
 All commands return a response:
-- `OK: System.DeviceOff executed` - Command successful
+- `OK: System.GotoPage(1) executed` - Command successful
 - `ERROR: ...` - Command failed
-- `Unknown command. Available: on, off, on-off, wakeup, toggle, show, hide, quit` - Invalid command
+- `Unknown command. Available: on, off, on-off, wakeup, page<N>, rotaryPage<N>, nextPage, previousPage, nextRotaryPage, previousRotaryPage, toggle, show, hide, quit` - Invalid command
 
 ---
 
@@ -178,10 +203,22 @@ loupixdeck on
 ## Summary
 
 **While app is running**, control it from terminal:
+
+**Device Control:**
 - `./loupixdeck-cli on` - Turn device ON
 - `./loupixdeck-cli off` - Turn device OFF
 - `./loupixdeck-cli on-off` - Toggle device ON/OFF
 - `./loupixdeck-cli wakeup` - Reconnect device and turn ON (for suspend/resume)
+
+**Page Navigation:**
+- `./loupixdeck-cli page1`, `page2`, etc. - Go to specific touch page
+- `./loupixdeck-cli rotaryPage1`, `rotaryPage2`, etc. - Go to specific rotary page
+- `./loupixdeck-cli nextPage` - Next touch page
+- `./loupixdeck-cli previousPage` - Previous touch page
+- `./loupixdeck-cli nextRotaryPage` - Next rotary page
+- `./loupixdeck-cli previousRotaryPage` - Previous rotary page
+
+**Window & App:**
 - `./loupixdeck-cli toggle` - Show/Hide window
 - `./loupixdeck-cli quit` - Exit app (with device clear)
 

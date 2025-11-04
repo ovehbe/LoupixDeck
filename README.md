@@ -225,9 +225,19 @@ dotnet run
 
 ### In-App Commands (Assign to Buttons):
 You can also assign these commands to physical buttons or touch buttons:
+
+**Device Control:**
 - `System.DeviceOff` - Turn device OFF
 - `System.DeviceOn` - Turn device ON
 - `System.ToggleWindow` - Show/hide GUI window
+
+**Page Navigation:**
+- `System.NextPage` - Next touch page
+- `System.PreviousPage` - Previous touch page
+- `System.NextRotaryPage` - Next rotary page
+- `System.PreviousRotaryPage` - Previous rotary page
+
+**Note:** For direct page navigation (page 1, 2, 3, etc.), use the CLI commands instead
 
 ### Example: Create Keyboard Shortcuts
 

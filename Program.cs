@@ -131,16 +131,34 @@ sealed class Program
             
             Console.WriteLine($"Received CLI command: {command}");
             
-            string response = command switch
+            string response;
+            
+            // Handle page commands (page1, page2, rotarypage1, etc.)
+            if (command.StartsWith("page") && int.TryParse(command.Substring(4), out int touchPageNum))
             {
-                "off" => ExecuteDeviceCommand("System.DeviceOff"),
-                "on" => ExecuteDeviceCommand("System.DeviceOn"),
-                "on-off" => ExecuteDeviceCommand("System.DeviceToggle"),
-                "wakeup" => ExecuteDeviceCommand("System.DeviceWakeup"),
-                "toggle" or "show" or "hide" => ExecuteDeviceCommand("System.ToggleWindow"),
-                "quit" => ExecuteQuit(),
-                _ => "Unknown command. Available: on, off, on-off, wakeup, toggle, show, hide, quit"
-            };
+                response = ExecuteDeviceCommand($"System.GotoPage({touchPageNum})");
+            }
+            else if (command.StartsWith("rotarypage") && int.TryParse(command.Substring(10), out int rotaryPageNum))
+            {
+                response = ExecuteDeviceCommand($"System.GotoRotaryPage({rotaryPageNum})");
+            }
+            else
+            {
+                response = command switch
+                {
+                    "off" => ExecuteDeviceCommand("System.DeviceOff"),
+                    "on" => ExecuteDeviceCommand("System.DeviceOn"),
+                    "on-off" => ExecuteDeviceCommand("System.DeviceToggle"),
+                    "wakeup" => ExecuteDeviceCommand("System.DeviceWakeup"),
+                    "nextpage" => ExecuteDeviceCommand("System.NextPage"),
+                    "previouspage" => ExecuteDeviceCommand("System.PreviousPage"),
+                    "nextrotarypage" => ExecuteDeviceCommand("System.NextRotaryPage"),
+                    "previousrotarypage" => ExecuteDeviceCommand("System.PreviousRotaryPage"),
+                    "toggle" or "show" or "hide" => ExecuteDeviceCommand("System.ToggleWindow"),
+                    "quit" => ExecuteQuit(),
+                    _ => "Unknown command. Available: on, off, on-off, wakeup, page<N>, rotaryPage<N>, nextPage, previousPage, nextRotaryPage, previousRotaryPage, toggle, show, hide, quit"
+                };
+            }
             
             var responseBytes = System.Text.Encoding.UTF8.GetBytes(response);
             client.Send(responseBytes);

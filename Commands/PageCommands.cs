@@ -66,3 +66,66 @@ public class PreviousRotaryPageCommand(LoupedeckLiveSController loupedeck) : IEx
         return Task.CompletedTask;
     }
 }
+
+[Command("System.GotoPage", "Go to Touch Page by Index", "Pages", ParameterTemplate = "(pageIndex)")]
+public class GotoPageCommand(IDeviceController controller) : IExecutableCommand
+{
+    public async Task Execute(string[] parameters)
+    {
+        if (parameters.Length != 1)
+        {
+            Console.WriteLine("Invalid parameter count. Usage: System.GotoPage(pageIndex)");
+            return;
+        }
+
+        if (!int.TryParse(parameters[0], out int pageIndex))
+        {
+            Console.WriteLine($"Invalid page index: {parameters[0]}");
+            return;
+        }
+
+        // Convert to 0-based index (user provides 1-based)
+        var targetIndex = pageIndex - 1;
+        
+        if (targetIndex < 0 || targetIndex >= controller.PageManager.TouchButtonPages.Count)
+        {
+            Console.WriteLine($"Page index {pageIndex} out of range (1-{controller.PageManager.TouchButtonPages.Count})");
+            return;
+        }
+
+        await controller.PageManager.ApplyTouchPage(targetIndex);
+        Console.WriteLine($"Switched to touch page {pageIndex}");
+    }
+}
+
+[Command("System.GotoRotaryPage", "Go to Rotary Page by Index", "Pages", ParameterTemplate = "(pageIndex)")]
+public class GotoRotaryPageCommand(IDeviceController controller) : IExecutableCommand
+{
+    public Task Execute(string[] parameters)
+    {
+        if (parameters.Length != 1)
+        {
+            Console.WriteLine("Invalid parameter count. Usage: System.GotoRotaryPage(pageIndex)");
+            return Task.CompletedTask;
+        }
+
+        if (!int.TryParse(parameters[0], out int pageIndex))
+        {
+            Console.WriteLine($"Invalid page index: {parameters[0]}");
+            return Task.CompletedTask;
+        }
+
+        // Convert to 0-based index (user provides 1-based)
+        var targetIndex = pageIndex - 1;
+        
+        if (targetIndex < 0 || targetIndex >= controller.PageManager.RotaryButtonPages.Count)
+        {
+            Console.WriteLine($"Page index {pageIndex} out of range (1-{controller.PageManager.RotaryButtonPages.Count})");
+            return Task.CompletedTask;
+        }
+
+        controller.PageManager.ApplyRotaryPage(targetIndex);
+        Console.WriteLine($"Switched to rotary page {pageIndex}");
+        return Task.CompletedTask;
+    }
+}
