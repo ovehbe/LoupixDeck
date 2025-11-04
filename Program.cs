@@ -133,8 +133,14 @@ sealed class Program
             
             string response;
             
+            // Handle updateButton command with parameters
+            if (command.StartsWith("updatebutton "))
+            {
+                var args = command.Substring(13).Trim(); // Remove "updatebutton "
+                response = ExecuteDeviceCommand($"System.UpdateButton({args})");
+            }
             // Handle page commands (page1, page2, rotarypage1, etc.)
-            if (command.StartsWith("page") && int.TryParse(command.Substring(4), out int touchPageNum))
+            else if (command.StartsWith("page") && int.TryParse(command.Substring(4), out int touchPageNum))
             {
                 response = ExecuteDeviceCommand($"System.GotoPage({touchPageNum})");
             }
@@ -156,7 +162,7 @@ sealed class Program
                     "previousrotarypage" => ExecuteDeviceCommand("System.PreviousRotaryPage"),
                     "toggle" or "show" or "hide" => ExecuteDeviceCommand("System.ToggleWindow"),
                     "quit" => ExecuteQuit(),
-                    _ => "Unknown command. Available: on, off, on-off, wakeup, page<N>, rotaryPage<N>, nextPage, previousPage, nextRotaryPage, previousRotaryPage, toggle, show, hide, quit"
+                    _ => "Unknown command. Available: on, off, on-off, wakeup, page<N>, rotaryPage<N>, nextPage, previousPage, nextRotaryPage, previousRotaryPage, updateButton, toggle, show, hide, quit"
                 };
             }
             

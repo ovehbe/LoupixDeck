@@ -207,6 +207,13 @@ dotnet run
 ./loupixdeck-cli wakeup   # Reconnect device and turn ON (for suspend/resume)
 ```
 
+**Button Control:**
+```bash
+# Update button display properties
+./loupixdeck-cli updateButton 0 text=Hello textColor=Red backColor=Blue
+./loupixdeck-cli updateButton 1 image=/path/to/icon.png
+```
+
 **Window Control:**
 ```bash
 ./loupixdeck-cli toggle   # Toggle window show/hide

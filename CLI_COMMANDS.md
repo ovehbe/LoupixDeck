@@ -54,7 +54,39 @@ dotnet run
 ```
 **Effect**: Shows window if hidden, hides if shown
 
-### 6. Page Navigation
+### 6. Update Button Properties
+
+Update text, colors, and images on touch buttons:
+
+```bash
+# Update button text
+./loupixdeck-cli updateButton 0 text=Hello
+
+# Update text and text color
+./loupixdeck-cli updateButton 0 text=Hello textColor=Red
+
+# Update background color
+./loupixdeck-cli updateButton 0 backColor=Blue
+
+# Update with image (use full path)
+./loupixdeck-cli updateButton 0 image=/path/to/image.png
+
+# Update multiple properties at once
+./loupixdeck-cli updateButton 0 text=Status textColor=White backColor=#00FF00
+
+# Clear the image
+./loupixdeck-cli updateButton 0 image=clear
+```
+
+**Supported properties:**
+- `text=...` - Button text
+- `textColor=...` - Text color (named colors like Red, Blue, or hex like #FF0000)
+- `backColor=...` - Background color (named colors or hex)
+- `image=...` - Path to image file, or "clear" to remove image
+
+**Note:** Button index is 0-based (0, 1, 2, etc.)
+
+### 7. Page Navigation
 
 **Go to Specific Touch Page:**
 ```bash
@@ -79,7 +111,7 @@ dotnet run
 ./loupixdeck-cli previousRotaryPage # Previous rotary page
 ```
 
-### 7. Quit Application
+### 8. Quit Application
 ```bash
 ./loupixdeck-cli quit
 ```
@@ -209,6 +241,9 @@ loupixdeck on
 - `./loupixdeck-cli off` - Turn device OFF
 - `./loupixdeck-cli on-off` - Toggle device ON/OFF
 - `./loupixdeck-cli wakeup` - Reconnect device and turn ON (for suspend/resume)
+
+**Button Control:**
+- `./loupixdeck-cli updateButton <index> text=... textColor=... backColor=... image=...` - Update button display
 
 **Page Navigation:**
 - `./loupixdeck-cli page1`, `page2`, etc. - Go to specific touch page
