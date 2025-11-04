@@ -26,6 +26,8 @@ public class RazerStreamControllerController(
     private readonly string _offConfigPath = FileDialogHelper.GetConfigPath("config_razer_off.json");
     private readonly string _templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "RazerDefaultConfig.json");
     private readonly string _offTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "RazerOffConfig.json");
+    
+    private bool _isDeviceOff = false;
 
     public IPageManager PageManager => pageManager;
 
@@ -207,6 +209,10 @@ public class RazerStreamControllerController(
     {
         if (e.EventType != Constants.ButtonEventType.BUTTON_DOWN)
             return;
+        
+        // Don't execute commands when device is OFF
+        if (_isDeviceOff)
+            return;
 
         var button = config.SimpleButtons.FirstOrDefault(b => b.Id == e.ButtonId);
         if (button != null)
@@ -252,6 +258,10 @@ public class RazerStreamControllerController(
     private void OnTouchButtonPress(object sender, TouchEventArgs e)
     {
         if (e.EventType != Constants.TouchEventType.TOUCH_START)
+            return;
+        
+        // Don't execute commands or vibrate when device is OFF
+        if (_isDeviceOff)
             return;
 
         foreach (var touch in e.Touches)
@@ -347,6 +357,10 @@ public class RazerStreamControllerController(
 
     private void OnRotate(object sender, RotateEventArgs e)
     {
+        // Don't execute commands when device is OFF
+        if (_isDeviceOff)
+            return;
+        
         // Handle rotation for all 6 knobs
         string command = e.ButtonId switch
         {
@@ -623,6 +637,9 @@ public class RazerStreamControllerController(
 
     public async Task ClearDeviceState()
     {
+        // Set device to OFF mode (disables all button commands)
+        _isDeviceOff = true;
+        
         // Simply apply the OFF config
         await ApplyOffConfig();
     }
@@ -630,6 +647,9 @@ public class RazerStreamControllerController(
     public async Task RestoreDeviceState()
     {
         Console.WriteLine("Restoring device state from current config...");
+        
+        // Set device to ON mode (enables all button commands)
+        _isDeviceOff = false;
         
         // Restore brightness
         await deviceService.Device.SetBrightness(config.Brightness / 100.0);

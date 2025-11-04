@@ -23,6 +23,8 @@ public class LoupedeckLiveSController(
     LoupedeckConfig config) : IDeviceController
 {
     private readonly string _configPath = FileDialogHelper.GetConfigPath("config.json");
+    
+    private bool _isDeviceOff = false;
 
     public IPageManager PageManager => pageManager;
 
@@ -149,6 +151,10 @@ public class LoupedeckLiveSController(
     {
         if (e.EventType != Constants.ButtonEventType.BUTTON_DOWN)
             return;
+        
+        // Don't execute commands when device is OFF
+        if (_isDeviceOff)
+            return;
 
         var button = config.SimpleButtons.FirstOrDefault(b => b.Id == e.ButtonId);
         if (button != null)
@@ -181,6 +187,10 @@ public class LoupedeckLiveSController(
     private void OnTouchButtonPress(object sender, TouchEventArgs e)
     {
         if (e.EventType != Constants.TouchEventType.TOUCH_START)
+            return;
+        
+        // Don't execute commands or vibrate when device is OFF
+        if (_isDeviceOff)
             return;
 
         foreach (var touch in e.Touches)
@@ -250,6 +260,10 @@ public class LoupedeckLiveSController(
 
     private void OnRotate(object sender, RotateEventArgs e)
     {
+        // Don't execute commands when device is OFF
+        if (_isDeviceOff)
+            return;
+        
         string command = e.ButtonId switch
         {
             Constants.ButtonType.KNOB_TL => e.Delta < 0
@@ -372,6 +386,9 @@ public class LoupedeckLiveSController(
         {
             Console.WriteLine("Clearing device state...");
             
+            // Set device to OFF mode (disables all button commands)
+            _isDeviceOff = true;
+            
             // Turn off display brightness
             await deviceService.Device.SetBrightness(0);
             
@@ -395,6 +412,9 @@ public class LoupedeckLiveSController(
     public async Task RestoreDeviceState()
     {
         Console.WriteLine("Restoring device state from current config...");
+        
+        // Set device to ON mode (enables all button commands)
+        _isDeviceOff = false;
         
         // Restore brightness
         await deviceService.Device.SetBrightness(config.Brightness / 100.0);
