@@ -156,8 +156,18 @@ public static class BitmapHelper
             canvas.Clear(touchButton.BackColor.ToSKColor());
         }
 
+        // Draw image with rotation (if set)
         if (touchButton.Image != null)
         {
+            if (touchButton.ImageRotation != 0)
+            {
+                // Apply rotation to image only
+                canvas.Save();
+                canvas.Translate(width / 2f, height / 2f);
+                canvas.RotateDegrees(touchButton.ImageRotation);
+                canvas.Translate(-width / 2f, -height / 2f);
+            }
+            
             var destRect = new SKRect(0, 0, width, height);
             
             var scaledImage = BitmapHelper.ScaleAndPositionBitmap(
@@ -169,44 +179,71 @@ public static class BitmapHelper
                 touchButton.ImagePositionY);
             
             canvas.DrawBitmap(scaledImage, destRect);
+            
+            if (touchButton.ImageRotation != 0)
+            {
+                canvas.Restore();
+            }
         }
 
+        // Draw text with rotation (if set)
         if (!string.IsNullOrEmpty(touchButton.Text))
         {
-            DrawTextAt(
-                canvas,
-                touchButton.Text,
-                touchButton.TextColor.ToSKColor(),
-                touchButton.TextSize,
-                touchButton.TextCentered,
-                touchButton.TextPositionX,
-                touchButton.TextPositionY,
-                width,
-                height,
-                touchButton.Bold,
-                touchButton.Italic,
-                touchButton.Outlined,
-                touchButton.OutlineColor.ToSKColor()
-            );
-        }
-
-        // Apply rotation if needed (for narrow displays)
-        if (touchButton.Rotation != 0)
-        {
-            // Keep same dimensions, rotate the canvas instead
-            var rotated = new SKBitmap(width, height);
-            using var rotatedCanvas = new SKCanvas(rotated);
-            
-            rotatedCanvas.Clear(SKColors.Transparent);
-            
-            // Rotate around center
-            rotatedCanvas.Translate(width / 2f, height / 2f);
-            rotatedCanvas.RotateDegrees(touchButton.Rotation);
-            rotatedCanvas.Translate(-width / 2f, -height / 2f);
-            rotatedCanvas.DrawBitmap(bitmap, 0, 0);
-            
-            bitmap.Dispose();
-            bitmap = rotated;
+            if (touchButton.TextRotation != 0)
+            {
+                // Apply rotation to text only
+                canvas.Save();
+                canvas.Translate(width / 2f, height / 2f);
+                canvas.RotateDegrees(touchButton.TextRotation);
+                
+                // For 90° or 270° rotation, swap width/height for text wrapping
+                var textWidth = width;
+                var textHeight = height;
+                if (touchButton.TextRotation == 90 || touchButton.TextRotation == 270 || 
+                    touchButton.TextRotation == -90 || touchButton.TextRotation == -270)
+                {
+                    textWidth = height;
+                    textHeight = width;
+                }
+                
+                canvas.Translate(-textWidth / 2f, -textHeight / 2f);
+                
+                DrawTextAt(
+                    canvas,
+                    touchButton.Text,
+                    touchButton.TextColor.ToSKColor(),
+                    touchButton.TextSize,
+                    touchButton.TextCentered,
+                    touchButton.TextPositionX,
+                    touchButton.TextPositionY,
+                    textWidth,
+                    textHeight,
+                    touchButton.Bold,
+                    touchButton.Italic,
+                    touchButton.Outlined,
+                    touchButton.OutlineColor.ToSKColor()
+                );
+                
+                canvas.Restore();
+            }
+            else
+            {
+                DrawTextAt(
+                    canvas,
+                    touchButton.Text,
+                    touchButton.TextColor.ToSKColor(),
+                    touchButton.TextSize,
+                    touchButton.TextCentered,
+                    touchButton.TextPositionX,
+                    touchButton.TextPositionY,
+                    width,
+                    height,
+                    touchButton.Bold,
+                    touchButton.Italic,
+                    touchButton.Outlined,
+                    touchButton.OutlineColor.ToSKColor()
+                );
+            }
         }
 
         // Convert back to RenderTargetBitmap and save in the TouchButton

@@ -99,14 +99,26 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Rotation (for narrow displays) -->
+                    <!-- Text Rotation (for narrow displays) -->
                     <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                        <TextBlock Text="Rotation:" Width="80" VerticalAlignment="Center" />
+                        <TextBlock Text="Text Rotation:" Width="80" VerticalAlignment="Center" />
                         <Slider Minimum="0" Maximum="270" TickFrequency="90"
-                                Value="{Binding ButtonData.Rotation, Mode=TwoWay}"
+                                Value="{Binding ButtonData.TextRotation, Mode=TwoWay}"
                                 IsSnapToTickEnabled="True"
                                 Width="180" />
-                        <TextBlock Text="{Binding ButtonData.Rotation}"
+                        <TextBlock Text="{Binding ButtonData.TextRotation}"
+                                   Width="40" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    
+                    <!-- Image Rotation (for narrow displays) -->
+                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                        <TextBlock Text="Image Rotation:" Width="80" VerticalAlignment="Center" />
+                        <Slider Minimum="0" Maximum="270" TickFrequency="90"
+                                Value="{Binding ButtonData.ImageRotation, Mode=TwoWay}"
+                                IsSnapToTickEnabled="True"
+                                Width="180" />
+                        <TextBlock Text="{Binding ButtonData.ImageRotation}"
                                    Width="40" Margin="5,0,0,0"
                                    VerticalAlignment="Center" />
                     </StackPanel>

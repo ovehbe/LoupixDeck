@@ -213,6 +213,7 @@ public class TouchButton(int index) : LoupedeckButton
 
     private int _rotation = 0;
 
+    [Obsolete("Use TextRotation or ImageRotation instead")]
     public int Rotation
     {
         get => _rotation;
@@ -220,8 +221,41 @@ public class TouchButton(int index) : LoupedeckButton
         {
             if (_rotation == value) return;
             _rotation = value;
+            // For backward compatibility, set both text and image rotation
+            _textRotation = value;
+            _imageRotation = value;
             Refresh();
             OnPropertyChanged(nameof(Rotation));
+            OnPropertyChanged(nameof(TextRotation));
+            OnPropertyChanged(nameof(ImageRotation));
+        }
+    }
+
+    private int _textRotation = 0;
+
+    public int TextRotation
+    {
+        get => _textRotation;
+        set
+        {
+            if (_textRotation == value) return;
+            _textRotation = value;
+            Refresh();
+            OnPropertyChanged(nameof(TextRotation));
+        }
+    }
+
+    private int _imageRotation = 0;
+
+    public int ImageRotation
+    {
+        get => _imageRotation;
+        set
+        {
+            if (_imageRotation == value) return;
+            _imageRotation = value;
+            Refresh();
+            OnPropertyChanged(nameof(ImageRotation));
         }
     }
 
