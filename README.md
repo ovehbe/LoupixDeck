@@ -90,37 +90,51 @@ It provides a highly customizable interface to assign commands, control external
 ![Screenshot_20-Mai_22-31-52_LoupixDeck](https://github.com/user-attachments/assets/dea8d42d-fc2f-4132-b80e-d4ddf3a463dc)
 
 
-## 🛠️ Build Instructions
+## 🛠️ Installation
 
-### Linux
+### Prerequisites
+- **.NET 9.0 SDK** or later ([Download](https://dotnet.microsoft.com/download))
+
+### Quick Install (Linux)
 
 ```bash
-git clone https://github.com/ovehbe/LoupixDeck.git
-cd LoupixDeck
+# Download latest release
+wget https://github.com/ovehbe/LoupixDeck/archive/refs/tags/v1.1-toggle-command.tar.gz
+tar -xzf v1.1-toggle-command.tar.gz
+cd LoupixDeck-*
+
+# Build and install
 dotnet publish LoupixDeck.csproj -c Release -r linux-x64 --self-contained true \
-            /p:PublishSingleFile=true \
-            /p:PublishTrimmed=false \
-            /p:EnableCompressionInSingleFile=true \
-            /p:ReadyToRun=true \
-            -o publish/linux-x64
+    /p:PublishSingleFile=true \
+    /p:PublishTrimmed=false \
+    /p:EnableCompressionInSingleFile=true \
+    /p:ReadyToRun=true \
+    -o ~/Applications/LoupixDeck
+
+chmod +x ~/Applications/LoupixDeck/LoupixDeck
 ```
 
-### Windows
+**Run:** `~/Applications/LoupixDeck/LoupixDeck`
+
+See [INSTALL.md](INSTALL.md) for detailed installation instructions, desktop entry creation, and keyboard shortcut setup.
+
+### Windows Build
 
 ```bash
 git clone https://github.com/ovehbe/LoupixDeck.git
 cd LoupixDeck
 dotnet publish LoupixDeck.csproj -c Release -r win-x64 --self-contained true `
-            /p:PublishSingleFile=true `
-            /p:PublishTrimmed=false `
-            /p:EnableCompressionInSingleFile=true `
-            /p:ReadyToRun=true `
-            -o publish/win-x64
+    /p:PublishSingleFile=true `
+    /p:PublishTrimmed=false `
+    /p:EnableCompressionInSingleFile=true `
+    /p:ReadyToRun=true `
+    -o publish/win-x64
 ```
 
-### Quick Development Run
+### Development Mode
 
 ```bash
+git clone https://github.com/ovehbe/LoupixDeck.git
 cd LoupixDeck
 dotnet run
 ```
