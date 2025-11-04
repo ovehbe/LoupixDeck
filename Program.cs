@@ -137,6 +137,8 @@ sealed class Program
             if (command.StartsWith("updatebutton "))
             {
                 var args = command.Substring(13).Trim(); // Remove "updatebutton "
+                // Replace spaces with commas for parameter format: "6 text=hello" -> "6,text=hello"
+                args = args.Replace(" ", ",");
                 response = ExecuteDeviceCommand($"System.UpdateButton({args})");
             }
             // Handle page commands (page1, page2, rotarypage1, etc.)

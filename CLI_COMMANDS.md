@@ -79,12 +79,15 @@ Update text, colors, and images on touch buttons:
 ```
 
 **Supported properties:**
-- `text=...` - Button text
+- `text=...` - Button text (use underscores for spaces: text=Hello_World)
 - `textColor=...` - Text color (named colors like Red, Blue, or hex like #FF0000)
 - `backColor=...` - Background color (named colors or hex)
 - `image=...` - Path to image file, or "clear" to remove image
 
-**Note:** Button index is 0-based (0, 1, 2, etc.)
+**Notes:** 
+- Button index is 0-based (0, 1, 2, etc.)
+- For text with spaces, use underscores: `text=Hello_World`
+- Separate multiple properties with spaces
 
 ### 7. Page Navigation
 
