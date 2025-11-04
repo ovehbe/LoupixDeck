@@ -89,6 +89,7 @@ It provides a highly customizable interface to assign commands, control external
 
 ![Screenshot_20-Mai_22-31-52_LoupixDeck](https://github.com/user-attachments/assets/dea8d42d-fc2f-4132-b80e-d4ddf3a463dc)
 
+<img width="814" height="548" alt="Screenshot from 2025-11-04 09 51 30" src="https://github.com/user-attachments/assets/05144e1f-2c1c-4f09-af24-630c3a1cfbb6" />
 
 ## 🛠️ Installation
 
