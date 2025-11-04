@@ -211,37 +211,40 @@ public class RazerStreamControllerController(
         var button = config.SimpleButtons.FirstOrDefault(b => b.Id == e.ButtonId);
         if (button != null)
         {
-            commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            if (!string.IsNullOrEmpty(button.Command))
+            {
+                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            }
         }
         else
         {
             // Handle rotary button presses (all 6 knobs)
+            string command = null;
             switch (e.ButtonId)
             {
                 case Constants.ButtonType.KNOB_TL:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[0].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0].Command;
                     break;
                 case Constants.ButtonType.KNOB_CL:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[1].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1].Command;
                     break;
                 case Constants.ButtonType.KNOB_BL:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[2].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2].Command;
                     break;
                 case Constants.ButtonType.KNOB_TR:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[3].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3].Command;
                     break;
                 case Constants.ButtonType.KNOB_CR:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[4].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4].Command;
                     break;
                 case Constants.ButtonType.KNOB_BR:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[5].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5].Command;
                     break;
+            }
+            
+            if (!string.IsNullOrEmpty(command))
+            {
+                commandService.ExecuteCommand(command).GetAwaiter().GetResult();
             }
         }
     }
@@ -259,7 +262,10 @@ public class RazerStreamControllerController(
             // Visual feedback: Flash the button
             _ = ShowTouchFeedback(button);
             
-            commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            if (!string.IsNullOrEmpty(button.Command))
+            {
+                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            }
             
             deviceService.Device.Vibrate();
         }

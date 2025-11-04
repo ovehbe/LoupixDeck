@@ -153,20 +153,27 @@ public class LoupedeckLiveSController(
         var button = config.SimpleButtons.FirstOrDefault(b => b.Id == e.ButtonId);
         if (button != null)
         {
-            commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            if (!string.IsNullOrEmpty(button.Command))
+            {
+                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            }
         }
         else
         {
+            string command = null;
             switch (e.ButtonId)
             {
                 case Constants.ButtonType.KNOB_TL:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[0].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0].Command;
                     break;
                 case Constants.ButtonType.KNOB_CL:
-                    commandService.ExecuteCommand(config.RotaryButtonPages[config.CurrentRotaryPageIndex]
-                        .RotaryButtons[1].Command).GetAwaiter().GetResult();
+                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1].Command;
                     break;
+            }
+            
+            if (!string.IsNullOrEmpty(command))
+            {
+                commandService.ExecuteCommand(command).GetAwaiter().GetResult();
             }
         }
     }
@@ -184,7 +191,10 @@ public class LoupedeckLiveSController(
             // Visual feedback: Flash the button
             _ = ShowTouchFeedback(button);
             
-            commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            if (!string.IsNullOrEmpty(button.Command))
+            {
+                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+            }
             
             deviceService.Device.Vibrate();
         }
