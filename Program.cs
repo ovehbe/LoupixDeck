@@ -25,11 +25,17 @@ sealed class Program
         {
             if (File.Exists(SocketPath))
             {
+                // App is already running - send toggle command
                 try
                 {
                     using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
                     client.Connect(new UnixDomainSocketEndPoint(SocketPath));
-                    Console.WriteLine("Already running.");
+                    
+                    // Send toggle command
+                    var message = System.Text.Encoding.UTF8.GetBytes("TOGGLE");
+                    client.Send(message);
+                    
+                    Console.WriteLine("Toggle command sent to running instance.");
                     return;
                 }
                 catch (SocketException)
@@ -41,6 +47,9 @@ sealed class Program
             _listenerSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             _listenerSocket.Bind(new UnixDomainSocketEndPoint(SocketPath));
             _listenerSocket.Listen(1);
+
+            // Listen for toggle commands in background
+            Task.Run(() => ListenForCommands());
 
             AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
@@ -61,6 +70,37 @@ sealed class Program
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
+
+#if !WINDOWS
+    private static void ListenForCommands()
+    {
+        try
+        {
+            while (true)
+            {
+                var clientSocket = _listenerSocket.Accept();
+                var buffer = new byte[1024];
+                var bytesRead = clientSocket.Receive(buffer);
+                var message = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                
+                if (message == "TOGGLE")
+                {
+                    Console.WriteLine("Received TOGGLE command");
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    {
+                        Views.MainWindow.ToggleVisibility();
+                    });
+                }
+                
+                clientSocket.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Command listener error: {ex.Message}");
+        }
+    }
+#endif
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()

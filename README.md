@@ -171,6 +171,32 @@ Configure them like any other button, but use the **Rotation** slider in setting
 
 ---
 
+## ⌨️ Window Toggle (Hide/Show)
+
+The app runs as a single instance. Running it again while it's already running will **toggle window visibility** (show/hide).
+
+### Toggle Command:
+```bash
+# Development build
+/path/to/LoupixDeck/bin/Debug/net9.0/LoupixDeck
+
+# Release build
+/path/to/LoupixDeck/publish/linux-x64/LoupixDeck
+```
+
+### Setting Up Keyboard Shortcut (Elementary OS):
+1. System Settings → Keyboard → Shortcuts → Custom
+2. Click **+** to add new shortcut
+3. **Name**: Toggle LoupixDeck
+4. **Command**: Full path to LoupixDeck executable
+5. **Shortcut**: Press your preferred keys (e.g., `Super+L` or `Ctrl+Alt+L`)
+
+Now you can hide the window and bring it back instantly with your keyboard shortcut! The app stays running in the background keeping your device active.
+
+**Note**: System tray icon is not implemented due to Avalonia framework limitations with AppIndicator3 on Elementary OS.
+
+---
+
 ## 🆕 What's New in This Fork
 
 This fork adds comprehensive support for the **Razer Stream Controller**:
