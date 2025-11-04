@@ -89,7 +89,8 @@ sealed class Program
             using var client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             client.Connect(new UnixDomainSocketEndPoint(SocketPath));
             
-            var command = args[0].ToLower();
+            // Join all arguments into a single command string
+            var command = string.Join(" ", args).ToLower();
             var message = System.Text.Encoding.UTF8.GetBytes(command);
             client.Send(message);
             
