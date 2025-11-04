@@ -1,0 +1,501 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LoupixDeck.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:LoupixDeck.Models.Converter"
+        mc:Ignorable="d"
+        Width="850" Height="350"
+        WindowStartupLocation="CenterScreen"
+        x:Class="LoupixDeck.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=True}"
+        Icon="avares://LoupixDeck/Assets/logo.ico"
+        Title="LoupixDeck"
+        x:Name="RootWindow">
+    <Window.Styles>
+        <Style Selector="Button[Tag=Touch]">
+            <Setter Property="Background" Value="#0F0F0F" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="90" />
+            <Setter Property="Height" Value="90" />
+            <Setter Property="Effect" Value="{StaticResource InnerShadow}" />
+        </Style>
+        <Style Selector="Button[Tag=Led]">
+            <Setter Property="Background" Value="#FF0F0F0F" />
+            <Setter Property="Effect" Value="{StaticResource InnerShadow}" />
+        </Style>
+        <Style Selector="Button[Tag=Mini]">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{StaticResource PanelDark}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+
+    </Window.Styles>
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Window.Resources>
+        <!-- Hier weisen Sie die Ressourcen zu -->
+        <conv:BoolToBrushConverter
+            x:Key="BoolToBrushConverter"
+            SelectedBrush="{StaticResource SelectedBrush}"
+            UnselectedBrush="{StaticResource UnselectedBrush}" />
+    </Window.Resources>
+
+    <Grid ColumnDefinitions="150,500,150,50" RowDefinitions="300,30,50">
+        <!-- Left Knobs Column -->
+        <Grid Grid.Row="0"
+              Grid.Column="0"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+            <ItemsControl ItemsSource="{Binding LoupedeckController.Config.CurrentRotaryButtonPage.RotaryButtons}"
+                          HorizontalAlignment="Center">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Spacing="10" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button
+                            HorizontalAlignment="Center"
+                            Width="90"
+                            Height="90"
+                            Background="Transparent"
+                            Command="{Binding ViewModel.RotaryButtonCommand, ElementName=RootWindow}"
+                            CommandParameter="{Binding}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{SvgImage avares://LoupixDeck/Assets/dial.svg}" Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
+            </Button>
+            <Button
+                Grid.Column="0"
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                Width="90"
+                Height="90"
+                Background="Transparent"
+                Command="{Binding RotaryButtonCommand}"
+                CommandParameter="{Binding LoupedeckController.Config.CurrentRotaryButtonPage.RotaryButtons[1], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{SvgImage avares://LoupixDeck/Assets/dial.svg}" Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Border>
+            </Button>
+            <Button Tag="Led"
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    Width="90"
+                    Height="90"
+                    Command="{Binding SimpleButtonCommand}"
+                    CommandParameter="{Binding LoupedeckController.Config.SimpleButtons[0]}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{Binding LoupedeckController.Config.SimpleButtons[0].RenderedImage}" />
+                </Border>
+            </Button>
+
+            <StackPanel Width="30"
+                        Margin="0,6,0,0"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Grid.RowSpan="3"
+                        HorizontalAlignment="Left"
+                        Orientation="Vertical">
+                <ItemsControl ItemsSource="{Binding LoupedeckController.Config.RotaryButtonPages}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Tag="Mini"
+                                    Content="{Binding Page}"
+                                    Command="{Binding ViewModel.RotaryPageButtonCommand, ElementName=RootWindow}"
+                                    CommandParameter="{Binding Page}"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="{Binding Selected, Converter={StaticResource BoolToBrushConverter}}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Content="+"
+                        Width="30"
+                        Height="30"
+                        CornerRadius="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding AddRotaryPageCommand}" />
+                <Button Content="x"
+                        Width="30"
+                        Height="30"
+                        CornerRadius="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding DeleteRotaryPageCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <ItemsControl Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center"
+                      ItemsSource="{Binding LoupedeckController.Config.CurrentTouchButtonPage.TouchButtons}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="3" Columns="{Binding LoupedeckController.Config.DeviceColumns}" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Tag="Touch"
+                            Width="90"
+                            Height="90"
+                            Margin="5"
+                            Command="{Binding ViewModel.TouchButtonCommand, ElementName=RootWindow}"
+                            CommandParameter="{Binding}">
+                        <Border CornerRadius="6" ClipToBounds="True">
+                            <Image Source="{Binding RenderedImage, Converter={StaticResource SkiaToBitmapConverter}}" />
+                        </Border>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Grid Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" RowDefinitions="100,100,100,30">
+            <Button Tag="Led"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Width="90"
+                    Height="90"
+                    Command="{Binding SimpleButtonCommand}"
+                    CommandParameter="{Binding LoupedeckController.Config.SimpleButtons[1]}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{Binding LoupedeckController.Config.SimpleButtons[1].RenderedImage}" />
+                </Border>
+            </Button>
+            <Button Tag="Led"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Width="90"
+                    Height="90"
+                    Command="{Binding SimpleButtonCommand}"
+                    CommandParameter="{Binding LoupedeckController.Config.SimpleButtons[2]}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{Binding LoupedeckController.Config.SimpleButtons[2].RenderedImage}" />
+                </Border>
+            </Button>
+            <Button Tag="Led"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Width="90"
+                    Height="90"
+                    Command="{Binding SimpleButtonCommand}"
+                    CommandParameter="{Binding LoupedeckController.Config.SimpleButtons[3]}">
+                <Button.Styles>
+                    <!-- Standard-Zustand -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- MouseOver -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Fokus (wenn der Button aktiv ist, z. B. nach einem Dialog) -->
+                    <Style Selector="Button:focus">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="LightGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+
+                    <!-- Geklickt/Hold-Zustand -->
+                    <Style Selector="Button:pressed">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="DarkGray" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Border.CornerRadius" Value="50" />
+                    </Style>
+                </Button.Styles>
+                <Border Background="Transparent" Width="90" Height="90" CornerRadius="50">
+                    <Image Source="{Binding LoupedeckController.Config.SimpleButtons[3].RenderedImage}" />
+                </Border>
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+            <ItemsControl ItemsSource="{Binding LoupedeckController.Config.TouchButtonPages}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Tag="Mini"
+                                Content="{Binding Page}"
+                                Command="{Binding ViewModel.TouchPageButtonCommand, ElementName=RootWindow}"
+                                CommandParameter="{Binding Page}"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Background="{Binding Selected, Converter={StaticResource BoolToBrushConverter}}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="+"
+                    Width="30"
+                    Height="30"
+                    CornerRadius="8"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding AddTouchPageCommand}" />
+            <Button Content="x"
+                    Width="30"
+                    Height="30"
+                    CornerRadius="8"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding DeleteTouchPageCommand}" />
+        </StackPanel>
+        <Button Grid.Row="0" Grid.Column="3" VerticalAlignment="Top" HorizontalAlignment="Left"
+                VerticalContentAlignment="Top"
+                Width="50"
+                Height="50"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0">
+            <Image Source="{SvgImage avares://LoupixDeck/Assets/hamburger.svg}" Stretch="Uniform" />
+            <Button.Flyout>
+                <Flyout Placement="Left">
+                    <StackPanel>
+                        <Button Width="100" Height="40" VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                FontSize="18"
+                                Content="Settings"
+                                Command="{Binding SettingsMenuCommand}" />
+                        <Separator />
+                        <Button Width="100" Height="40" VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                FontSize="18"
+                                Content="About"
+                                Command="{Binding AboutMenuCommand}" />
+                        <Button Width="100" Height="40" VerticalContentAlignment="Center" Margin="0,5,0,0"
+                                HorizontalContentAlignment="Center"
+                                FontSize="18"
+                                Content="Quit"
+                                Command="{Binding QuitApplicationCommand}" />
+                    </StackPanel>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</Window>
