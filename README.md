@@ -244,6 +244,9 @@ You can also assign these commands to physical buttons or touch buttons:
 - `System.NextRotaryPage` - Next rotary page
 - `System.PreviousRotaryPage` - Previous rotary page
 
+**Button Control:**
+- `System.UpdateButton(index,text=...,textColor=...,backColor=...,image=...)` - Update button properties
+
 **Note:** For direct page navigation (page 1, 2, 3, etc.), use the CLI commands instead
 
 ### Example: Create Keyboard Shortcuts
