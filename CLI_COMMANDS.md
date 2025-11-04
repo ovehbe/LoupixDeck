@@ -62,8 +62,11 @@ Update text, colors, and images on touch buttons:
 # Update button text
 ./loupixdeck-cli updateButton 0 text=Hello
 
+# Text with spaces (underscores become spaces)
+./loupixdeck-cli updateButton 0 text=Hello_World
+
 # Update text and text color
-./loupixdeck-cli updateButton 0 text=Hello textColor=Red
+./loupixdeck-cli updateButton 0 text=Status textColor=Red
 
 # Update background color
 ./loupixdeck-cli updateButton 0 backColor=Blue

@@ -60,9 +60,10 @@ public class UpdateButtonCommand(IDeviceController controller) : IExecutableComm
             switch (key)
             {
                 case "text":
-                    button.Text = value;
+                    // Replace underscores with spaces for better CLI usability
+                    button.Text = value.Replace("_", " ");
                     updated = true;
-                    Console.WriteLine($"Updated text: {value}");
+                    Console.WriteLine($"Updated text: {button.Text}");
                     break;
 
                 case "textcolor":
