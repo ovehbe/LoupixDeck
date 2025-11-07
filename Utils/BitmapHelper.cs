@@ -124,14 +124,18 @@ public static class BitmapHelper
         var bitmap = new SKBitmap(width, height);
         using var canvas = new SKCanvas(bitmap);
 
-        if (config.Wallpaper != null && gridColumns > 0)
+        // Use page-specific wallpaper
+        var pageWallpaper = config.CurrentTouchButtonPage?.Wallpaper;
+        var pageWallpaperOpacity = config.CurrentTouchButtonPage?.WallpaperOpacity ?? 0.0;
+
+        if (pageWallpaper != null && gridColumns > 0)
         {
             // Determine the position of the button in the grid
             var col = touchButton.Index % gridColumns;
             var row = touchButton.Index / gridColumns;
 
             // Calculate the section from the wallpaper
-            var wallpaperBitmap = config.Wallpaper;
+            var wallpaperBitmap = pageWallpaper;
             var srcRect = new SKRect(
                 col * width,
                 row * height,
@@ -146,7 +150,7 @@ public static class BitmapHelper
             // Semi-transparent background
             using var paint = new SKPaint();
 
-            paint.Color = new SKColor(0, 0, 0, (byte)(255 * config.WallpaperOpacity));
+            paint.Color = new SKColor(0, 0, 0, (byte)(255 * pageWallpaperOpacity));
 
             canvas.DrawRect(destRect, paint);
         }

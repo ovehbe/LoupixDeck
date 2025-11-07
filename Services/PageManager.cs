@@ -90,10 +90,11 @@ public class PageManager : IPageManager
 
         OnRotaryPageChanged?.Invoke(previousRotaryPageIndex, CurrentRotaryPageIndex);
 
-        if (!init)
-        {
-            _deviceService.ShowTemporaryTextButton(0, CurrentRotaryButtonPage.PageName, 2000);
-        }
+        // Page indicator disabled
+        //if (!init)
+        //{
+        //    _deviceService.ShowTemporaryTextButton(0, CurrentRotaryButtonPage.PageName, 2000);
+        //}
     }
 
     public async Task NextTouchPage()
@@ -123,10 +124,11 @@ public class PageManager : IPageManager
         OnTouchPageChanged?.Invoke(PreviousTouchPageIndex, CurrentTouchPageIndex);
         await DrawTouchButtons();
 
-        if (!init)
-        {
-            await _deviceService.ShowTemporaryTextButton(0, CurrentTouchButtonPage.PageName, 2000);
-        }
+        // Page indicator disabled
+        //if (!init)
+        //{
+        //    await _deviceService.ShowTemporaryTextButton(0, CurrentTouchButtonPage.PageName, 2000);
+        //}
     }
 
     private async Task DrawTouchButtons()

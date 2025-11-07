@@ -11,7 +11,7 @@
     {
       "Id": 6,
       "ButtonColor": "#ff54c304",
-      "Command": "",
+      "Command": "loupixdeck toggle",
       "IgnoreRefresh": false
     },
     {
@@ -52,8 +52,9 @@
     },
     {
       "Id": 13,
-      "ButtonColor": "Black",
-      "Command": "",
+      "ButtonColor": "#ffff0004",
+      "EnableWhenOff": true,
+      "Command": "loupixdeck on-off",
       "IgnoreRefresh": false
     }
   ],
@@ -409,10 +410,10 @@
       ]
     }
   ],
-  "Brightness": 0,
+  "Brightness": 50,
   "Wallpaper": null,
   "WallpaperOpacity": 0.0,
   "TouchFeedbackEnabled": true,
   "TouchFeedbackColor": "White",
-  "TouchFeedbackOpacity": 0.7
+  "TouchFeedbackOpacity": 0.1
 }

@@ -102,16 +102,27 @@
             <StackPanel x:Name="Wallpaper"
                         IsVisible="{Binding CurrentView, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Wallpaper}">
                 <TextBlock Text="Wallpaper" FontSize="24" FontWeight="Bold" />
+                
+                <!-- Page Selection -->
+                <TextBlock Text="Select Page:" FontWeight="SemiBold" Margin="0,10,0,5" />
+                <ComboBox Width="200" HorizontalAlignment="Left"
+                          ItemsSource="{Binding AvailablePages}"
+                          SelectedIndex="{Binding SelectedWallpaperPageIndex, Mode=TwoWay}"
+                          Margin="0,0,0,10" />
+                
                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
                     <Border BorderBrush="Black" BorderThickness="2" CornerRadius="5">
-                        <Image Width="400" Height="190" Source="{Binding Config.Wallpaper, Converter={StaticResource SkiaToBitmapConverter}}" />
+                        <Image Width="400" Height="190" Source="{Binding CurrentWallpaper, Converter={StaticResource SkiaToBitmapConverter}}" />
                     </Border>
-                    <Button Content="..." VerticalAlignment="Top" Command="{Binding SelectImageButtonCommand}"></Button>
+                    <StackPanel Spacing="5">
+                        <Button Content="Select..." VerticalAlignment="Top" Command="{Binding SelectImageButtonCommand}" Width="80"></Button>
+                        <Button Content="Remove" VerticalAlignment="Top" Command="{Binding RemoveWallpaperCommand}" Width="80"></Button>
+                    </StackPanel>
                 </StackPanel>
                 <TextBlock Text="Opacity:" Margin="0,10,0,0" />
                 <Slider Minimum="0" Maximum="1" HorizontalAlignment="Left" TickFrequency="0.1"
                         IsSnapToTickEnabled="True"
-                        Value="{Binding Config.WallpaperOpacity, Mode=TwoWay}" Width="200" />
+                        Value="{Binding WallpaperOpacity, Mode=TwoWay}" Width="200" />
 
                 <!-- Scaling Controls -->
                 <ComboBox Width="200" Margin="0,10,0,0"
@@ -146,22 +157,29 @@
                 IsVisible="{Binding CurrentView, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=GlobalCommands}">
                 <StackPanel>
                     <TextBlock Text="Global Commands" FontSize="24" FontWeight="Bold" />
-                    <TextBlock Text="Apply prefix/suffix commands to all buttons of each type" 
-                               TextWrapping="Wrap" Margin="0,5,0,15" Foreground="Gray" />
+                    <TextBlock Text="Apply prefix/suffix commands to all buttons of each type on a specific page" 
+                               TextWrapping="Wrap" Margin="0,5,0,10" Foreground="Gray" />
+
+                    <!-- Page Selection -->
+                    <TextBlock Text="Select Page:" FontWeight="SemiBold" Margin="0,10,0,5" />
+                    <ComboBox Width="200" HorizontalAlignment="Left"
+                              ItemsSource="{Binding AvailablePages}"
+                              SelectedIndex="{Binding SelectedPageIndex, Mode=TwoWay}"
+                              Margin="0,0,0,20" />
 
                     <!-- Touch Buttons Section -->
                     <TextBlock Text="Touch Buttons" FontSize="18" FontWeight="Bold" Margin="0,10,0,5" />
                     
-                    <CheckBox Content="Enable Prefix" IsChecked="{Binding Config.TouchButtonPrefixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Prefix" IsChecked="{Binding TouchButtonPrefixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Prefix command (e.g., echo 'Touch started')" 
-                             Text="{Binding Config.TouchButtonPrefixCommand}"
-                             IsEnabled="{Binding Config.TouchButtonPrefixEnabled}"
+                             Text="{Binding TouchButtonPrefixCommand}"
+                             IsEnabled="{Binding TouchButtonPrefixEnabled}"
                              Margin="0,5,0,10" />
                     
-                    <CheckBox Content="Enable Suffix" IsChecked="{Binding Config.TouchButtonSuffixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Suffix" IsChecked="{Binding TouchButtonSuffixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Suffix command (e.g., echo 'Touch ended')" 
-                             Text="{Binding Config.TouchButtonSuffixCommand}"
-                             IsEnabled="{Binding Config.TouchButtonSuffixEnabled}"
+                             Text="{Binding TouchButtonSuffixCommand}"
+                             IsEnabled="{Binding TouchButtonSuffixEnabled}"
                              Margin="0,5,0,0" />
 
                     <Separator Margin="0,20,0,10"/>
@@ -169,16 +187,16 @@
                     <!-- Simple Buttons Section -->
                     <TextBlock Text="Simple Buttons" FontSize="18" FontWeight="Bold" Margin="0,10,0,5" />
                     
-                    <CheckBox Content="Enable Prefix" IsChecked="{Binding Config.SimpleButtonPrefixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Prefix" IsChecked="{Binding SimpleButtonPrefixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Prefix command" 
-                             Text="{Binding Config.SimpleButtonPrefixCommand}"
-                             IsEnabled="{Binding Config.SimpleButtonPrefixEnabled}"
+                             Text="{Binding SimpleButtonPrefixCommand}"
+                             IsEnabled="{Binding SimpleButtonPrefixEnabled}"
                              Margin="0,5,0,10" />
                     
-                    <CheckBox Content="Enable Suffix" IsChecked="{Binding Config.SimpleButtonSuffixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Suffix" IsChecked="{Binding SimpleButtonSuffixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Suffix command" 
-                             Text="{Binding Config.SimpleButtonSuffixCommand}"
-                             IsEnabled="{Binding Config.SimpleButtonSuffixEnabled}"
+                             Text="{Binding SimpleButtonSuffixCommand}"
+                             IsEnabled="{Binding SimpleButtonSuffixEnabled}"
                              Margin="0,5,0,0" />
 
                     <Separator Margin="0,20,0,10"/>
@@ -188,44 +206,44 @@
                     
                     <!-- Knob Left -->
                     <TextBlock Text="Rotate Left:" FontWeight="SemiBold" Margin="0,10,0,3" />
-                    <CheckBox Content="Enable Prefix" IsChecked="{Binding Config.KnobLeftPrefixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Prefix" IsChecked="{Binding KnobLeftPrefixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Prefix command for knob rotate left" 
-                             Text="{Binding Config.KnobLeftPrefixCommand}"
-                             IsEnabled="{Binding Config.KnobLeftPrefixEnabled}"
+                             Text="{Binding KnobLeftPrefixCommand}"
+                             IsEnabled="{Binding KnobLeftPrefixEnabled}"
                              Margin="0,5,0,5" />
                     
-                    <CheckBox Content="Enable Suffix" IsChecked="{Binding Config.KnobLeftSuffixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Suffix" IsChecked="{Binding KnobLeftSuffixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Suffix command for knob rotate left" 
-                             Text="{Binding Config.KnobLeftSuffixCommand}"
-                             IsEnabled="{Binding Config.KnobLeftSuffixEnabled}"
+                             Text="{Binding KnobLeftSuffixCommand}"
+                             IsEnabled="{Binding KnobLeftSuffixEnabled}"
                              Margin="0,5,0,10" />
                     
                     <!-- Knob Right -->
                     <TextBlock Text="Rotate Right:" FontWeight="SemiBold" Margin="0,10,0,3" />
-                    <CheckBox Content="Enable Prefix" IsChecked="{Binding Config.KnobRightPrefixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Prefix" IsChecked="{Binding KnobRightPrefixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Prefix command for knob rotate right" 
-                             Text="{Binding Config.KnobRightPrefixCommand}"
-                             IsEnabled="{Binding Config.KnobRightPrefixEnabled}"
+                             Text="{Binding KnobRightPrefixCommand}"
+                             IsEnabled="{Binding KnobRightPrefixEnabled}"
                              Margin="0,5,0,5" />
                     
-                    <CheckBox Content="Enable Suffix" IsChecked="{Binding Config.KnobRightSuffixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Suffix" IsChecked="{Binding KnobRightSuffixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Suffix command for knob rotate right" 
-                             Text="{Binding Config.KnobRightSuffixCommand}"
-                             IsEnabled="{Binding Config.KnobRightSuffixEnabled}"
+                             Text="{Binding KnobRightSuffixCommand}"
+                             IsEnabled="{Binding KnobRightSuffixEnabled}"
                              Margin="0,5,0,10" />
                     
                     <!-- Knob Press -->
                     <TextBlock Text="Press/Click:" FontWeight="SemiBold" Margin="0,10,0,3" />
-                    <CheckBox Content="Enable Prefix" IsChecked="{Binding Config.KnobPressPrefixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Prefix" IsChecked="{Binding KnobPressPrefixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Prefix command for knob press" 
-                             Text="{Binding Config.KnobPressPrefixCommand}"
-                             IsEnabled="{Binding Config.KnobPressPrefixEnabled}"
+                             Text="{Binding KnobPressPrefixCommand}"
+                             IsEnabled="{Binding KnobPressPrefixEnabled}"
                              Margin="0,5,0,5" />
                     
-                    <CheckBox Content="Enable Suffix" IsChecked="{Binding Config.KnobPressSuffixEnabled}" Margin="0,5,0,0" />
+                    <CheckBox Content="Enable Suffix" IsChecked="{Binding KnobPressSuffixEnabled}" Margin="0,5,0,0" />
                     <TextBox Watermark="Suffix command for knob press" 
-                             Text="{Binding Config.KnobPressSuffixCommand}"
-                             IsEnabled="{Binding Config.KnobPressSuffixEnabled}"
+                             Text="{Binding KnobPressSuffixCommand}"
+                             IsEnabled="{Binding KnobPressSuffixEnabled}"
                              Margin="0,5,0,10" />
                 </StackPanel>
             </ScrollViewer>

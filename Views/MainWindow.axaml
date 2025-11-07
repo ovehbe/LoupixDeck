@@ -7,6 +7,7 @@
         xmlns:conv="clr-namespace:LoupixDeck.Models.Converter"
         mc:Ignorable="d"
         Width="760" Height="460"
+        CanResize="False"
         WindowStartupLocation="CenterScreen"
         x:Class="LoupixDeck.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"

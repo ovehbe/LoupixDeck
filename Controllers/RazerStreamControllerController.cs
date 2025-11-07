@@ -57,8 +57,7 @@ public class RazerStreamControllerController(
             config.SimpleButtons = savedConfig.SimpleButtons;
             config.RotaryButtonPages = savedConfig.RotaryButtonPages;
             config.TouchButtonPages = savedConfig.TouchButtonPages;
-            config.Wallpaper = savedConfig.Wallpaper;
-            config.WallpaperOpacity = savedConfig.WallpaperOpacity;
+            // Wallpaper is now per-page (stored in TouchButtonPage)
             config.TouchFeedbackEnabled = savedConfig.TouchFeedbackEnabled;
             config.TouchFeedbackColor = savedConfig.TouchFeedbackColor;
             config.TouchFeedbackOpacity = savedConfig.TouchFeedbackOpacity;
@@ -106,6 +105,12 @@ public class RazerStreamControllerController(
         Console.WriteLine("Applying actual config...");
 
         pageManager.OnTouchPageChanged += OnTouchPageChanged;
+        
+        // Subscribe to current page property changes for wallpaper
+        if (config.CurrentTouchButtonPage != null)
+        {
+            config.CurrentTouchButtonPage.PropertyChanged += PagePropertyChanged;
+        }
 
         // Only initialize buttons if not loaded from config
         if (config.SimpleButtons == null || config.SimpleButtons.Length == 0)
@@ -264,10 +269,10 @@ public class RazerStreamControllerController(
             {
                 var wrappedCommand = WrapCommand(
                     button.Command,
-                    config.SimpleButtonPrefixEnabled,
-                    config.SimpleButtonPrefixCommand,
-                    config.SimpleButtonSuffixEnabled,
-                    config.SimpleButtonSuffixCommand
+                    config.CurrentRotaryButtonPage.SimpleButtonPrefixEnabled,
+                    config.CurrentRotaryButtonPage.SimpleButtonPrefixCommand,
+                    config.CurrentRotaryButtonPage.SimpleButtonSuffixEnabled,
+                    config.CurrentRotaryButtonPage.SimpleButtonSuffixCommand
                 );
                 commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
             }
@@ -308,10 +313,10 @@ public class RazerStreamControllerController(
                 {
                     var wrappedCommand = WrapCommand(
                         rotaryButton.Command,
-                        config.KnobPressPrefixEnabled,
-                        config.KnobPressPrefixCommand,
-                        config.KnobPressSuffixEnabled,
-                        config.KnobPressSuffixCommand
+                        config.CurrentRotaryButtonPage.KnobPressPrefixEnabled,
+                        config.CurrentRotaryButtonPage.KnobPressPrefixCommand,
+                        config.CurrentRotaryButtonPage.KnobPressSuffixEnabled,
+                        config.CurrentRotaryButtonPage.KnobPressSuffixCommand
                     );
                     commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
                 }
@@ -367,10 +372,10 @@ public class RazerStreamControllerController(
         {
             var wrappedCommand = WrapCommand(
                 button.Command,
-                config.TouchButtonPrefixEnabled,
-                config.TouchButtonPrefixCommand,
-                config.TouchButtonSuffixEnabled,
-                config.TouchButtonSuffixCommand
+                config.CurrentTouchButtonPage.TouchButtonPrefixEnabled,
+                config.CurrentTouchButtonPage.TouchButtonPrefixCommand,
+                config.CurrentTouchButtonPage.TouchButtonSuffixEnabled,
+                config.CurrentTouchButtonPage.TouchButtonSuffixCommand
             );
             commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
         }
@@ -484,10 +489,10 @@ public class RazerStreamControllerController(
         {
             // Wrap with appropriate prefix/suffix based on rotation direction
             var wrappedCommand = e.Delta < 0
-                ? WrapCommand(command, config.KnobLeftPrefixEnabled, config.KnobLeftPrefixCommand,
-                    config.KnobLeftSuffixEnabled, config.KnobLeftSuffixCommand)
-                : WrapCommand(command, config.KnobRightPrefixEnabled, config.KnobRightPrefixCommand,
-                    config.KnobRightSuffixEnabled, config.KnobRightSuffixCommand);
+                ? WrapCommand(command, config.CurrentRotaryButtonPage.KnobLeftPrefixEnabled, config.CurrentRotaryButtonPage.KnobLeftPrefixCommand,
+                    config.CurrentRotaryButtonPage.KnobLeftSuffixEnabled, config.CurrentRotaryButtonPage.KnobLeftSuffixCommand)
+                : WrapCommand(command, config.CurrentRotaryButtonPage.KnobRightPrefixEnabled, config.CurrentRotaryButtonPage.KnobRightPrefixCommand,
+                    config.CurrentRotaryButtonPage.KnobRightSuffixEnabled, config.CurrentRotaryButtonPage.KnobRightSuffixCommand);
             
             commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
         }
@@ -501,6 +506,8 @@ public class RazerStreamControllerController(
             {
                 touchButton.ItemChanged -= TouchItemChanged;
             }
+            // Unsubscribe from page property changes
+            config.TouchButtonPages[oldIndex].PropertyChanged -= PagePropertyChanged;
         }
 
         if (newIndex >= 0 && newIndex < config.TouchButtonPages.Count && config.TouchButtonPages[newIndex] != null)
@@ -508,6 +515,49 @@ public class RazerStreamControllerController(
             foreach (var touchButton in config.TouchButtonPages[newIndex].TouchButtons)
             {
                 touchButton.ItemChanged += TouchItemChanged;
+            }
+            // Subscribe to page property changes for wallpaper updates
+            config.TouchButtonPages[newIndex].PropertyChanged += PagePropertyChanged;
+        }
+    }
+
+    private async void PagePropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TouchButtonPage.Wallpaper) || e.PropertyName == nameof(TouchButtonPage.WallpaperOpacity))
+        {
+            _propertyChangedCts?.Cancel();
+            _propertyChangedCts = new CancellationTokenSource();
+            var token = _propertyChangedCts.Token;
+
+            try
+            {
+                await Task.Delay(100, token); // Debounce
+                foreach (var touchButton in config.CurrentTouchButtonPage.TouchButtons)
+                {
+                    if (touchButton.Index == 12 || touchButton.Index == 13)
+                    {
+                        // Side display buttons (60×270)
+                        if (deviceService.Device is LoupixDeck.LoupedeckDevice.Device.RazerStreamControllerDevice razerDevice)
+                        {
+                            var bitmap = BitmapHelper.RenderTouchButtonContent(touchButton, config, 60, 270, 1);
+                            if (bitmap != null)
+                            {
+                                touchButton.RenderedImage = bitmap;
+                                await razerDevice.DrawSideDisplayButton(touchButton.Index, bitmap);
+                            }
+                        }
+                    }
+                    else if (touchButton.Index < 12)
+                    {
+                        // Center grid buttons
+                        await deviceService.Device.DrawTouchButton(touchButton, config, true, config.DeviceColumns);
+                    }
+                    await Task.Delay(0, token);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // ignore canceled Tasks
             }
         }
     }
@@ -608,32 +658,7 @@ public class RazerStreamControllerController(
                     await deviceService.Device.SetBrightness(config.Brightness / 100.0);
                     break;
 
-                case nameof(LoupedeckConfig.Wallpaper):
-                case nameof(LoupedeckConfig.WallpaperOpacity):
-                    await Task.Delay(100, token); // Debounce
-                    foreach (var touchButton in config.CurrentTouchButtonPage.TouchButtons)
-                    {
-                        if (touchButton.Index == 12 || touchButton.Index == 13)
-                        {
-                            // Side display buttons (60×270)
-                            if (deviceService.Device is LoupixDeck.LoupedeckDevice.Device.RazerStreamControllerDevice razerDevice)
-                            {
-                                var bitmap = BitmapHelper.RenderTouchButtonContent(touchButton, config, 60, 270, 1);
-                                if (bitmap != null)
-                                {
-                                    touchButton.RenderedImage = bitmap;
-                                    await razerDevice.DrawSideDisplayButton(touchButton.Index, bitmap);
-                                }
-                            }
-                        }
-                        else if (touchButton.Index < 12)
-                        {
-                            // Center grid buttons
-                            await deviceService.Device.DrawTouchButton(touchButton, config, true, config.DeviceColumns);
-                        }
-                        await Task.Delay(0, token);
-                    }
-                    break;
+                // Wallpaper is now handled per-page via PagePropertyChanged event
             }
         }
         catch (TaskCanceledException)

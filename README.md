@@ -4,6 +4,8 @@
 [![Platform](https://img.shields.io/badge/platform-linux-blue)](https://github.com/RadiatorTwo/LoupixDeck)
 [![Platform](https://img.shields.io/badge/platform-windows-blue)](https://github.com/RadiatorTwo/LoupixDeck)
 
+# ⚠️ THIS FORK IS ONLY TESTED WITH RAZER STREAM CONTROLLER (LOUPEDECK LIVE)
+
 **LoupixDeck** is a Linux and Windows application for controlling the **Loupedeck Live S** and **Razer Stream Controller**.  
 It provides a highly customizable interface to assign commands, control external tools, and build dynamic layouts using touchscreen and rotary inputs.
 
@@ -23,7 +25,8 @@ It provides a highly customizable interface to assign commands, control external
 
 - **Custom touchscreen button rendering**:
   - Images, background colors, text
-  - Tiled wallpaper rendered across all touchscreen buttons
+  - **Per-page wallpapers**: Set different wallpapers for each page with independent opacity controls
+  - **Wallpaper management**: Easy select and remove buttons in settings
   - Rotation support for narrow side displays (0°, 90°, 180°, 270°)
 - **Full input support**:
   - Touch input, rotary encoder turns/clicks, and physical button presses
@@ -33,14 +36,16 @@ It provides a highly customizable interface to assign commands, control external
   - **Touch sliding prevention**: No accidental multi-triggers when finger slides across buttons
 - **Dynamic page system**:
   - Independent pages for touch and rotary buttons
-  - Temporary on-screen display of the active page index
+  - **Silent page switching**: No visual page indicator (clean switching)
 - **Flexible command actions**:
   - Execute shell commands on button press
   - Send keyboard macros
-  - **Global Commands**: Add prefix/suffix commands to all buttons of the same type
-    - Touch buttons: Global pre/post actions for all touch buttons
-    - Simple buttons: Global pre/post actions for physical LED buttons
-    - Knobs: Separate prefix/suffix for left rotation, right rotation, and press
+  - **Per-Page Global Commands**: Add prefix/suffix commands to all buttons on a specific page
+    - Select which page to configure via dropdown
+    - Touch buttons: Global pre/post actions for all touch buttons on current page
+    - Simple buttons: Global pre/post actions for physical LED buttons on current page
+    - Knobs: Separate prefix/suffix for left rotation, right rotation, and press on current page
+    - Perfect for page-specific logging, mode switching, or state management
 - **Device configuration**:
   - Adjust display brightness
   - Set individual RGB colors for each physical button
@@ -103,28 +108,36 @@ It provides a highly customizable interface to assign commands, control external
 ### Prerequisites
 - **.NET 9.0 SDK** or later ([Download](https://dotnet.microsoft.com/download))
 
-### Quick Install (Linux)
+### Quick Install (Linux) - Recommended
+
+The easiest way to install is using the automated build script:
 
 ```bash
-# Download latest release
-wget https://github.com/ovehbe/LoupixDeck/archive/refs/tags/v1.1-toggle-command.tar.gz
-tar -xzf v1.1-toggle-command.tar.gz
-cd LoupixDeck-*
+# Clone or download the repository
+git clone https://github.com/ovehbe/LoupixDeck.git
+cd LoupixDeck
 
-# Build and install
-dotnet publish LoupixDeck.csproj -c Release -r linux-x64 --self-contained true \
-    /p:PublishSingleFile=true \
-    /p:PublishTrimmed=false \
-    /p:EnableCompressionInSingleFile=true \
-    /p:ReadyToRun=true \
-    -o ~/Applications/LoupixDeck
-
-chmod +x ~/Applications/LoupixDeck/LoupixDeck
+# Run the automated build script
+./build_release.sh
 ```
 
-**Run:** `~/Applications/LoupixDeck/LoupixDeck`
+This script will:
+- Build the application
+- Create necessary directories
+- Add symbolic links
+- Create a desktop launcher automatically
+- Make everything ready to use!
 
-See [INSTALL.md](INSTALL.md) for detailed installation instructions, desktop entry creation, and keyboard shortcut setup.
+**After installation, run:** `loupixdeck` from terminal or launch from your application menu.
+
+### Default Button Configuration
+After you launch the app for the first time:
+- **Button 0** (first physical button): App window toggle (show/hide)
+- **Button 7** (last physical button): Device ON/OFF toggle
+
+These defaults help you get started quickly!
+
+See [INSTALL.md](INSTALL.md) for detailed manual installation instructions, additional setup options, and keyboard shortcut configuration.
 
 ### Windows Build
 
@@ -297,12 +310,20 @@ This fork adds comprehensive support for the **Razer Stream Controller**:
 - **Enable When OFF**: Keep specific physical buttons and knobs functional when device is in OFF mode
   - Perfect for "Turn ON" buttons or window toggle controls
   - Configurable per button in button settings
-- **Global Commands** (Settings → Global Commands):
-  - Add prefix/suffix commands to all buttons of each type
+- **Per-Page Global Commands** (Settings → Global Commands):
+  - Configure different global commands for each page via dropdown selector
+  - Add prefix/suffix commands to all buttons on the selected page
   - **Touch Buttons**: Wrap all touch button commands with pre/post actions
   - **Simple Buttons**: Global pre/post for physical LED buttons
   - **Knobs**: Separate prefix/suffix for rotate left, rotate right, and button press
-  - Example uses: Logging, notifications, mode switching, state management
+  - Each page can have completely different global command behavior
+  - Example uses: Page-specific logging, different notification styles, mode-dependent actions
+- **Per-Page Wallpapers**:
+  - Set unique wallpapers for each page
+  - Independent opacity control per page
+  - Easy wallpaper selection and removal
+  - Configure via Settings → Wallpaper with page dropdown
+- **Clean Page Switching**: No visual page indicator on display (silent page changes)
 - **Rotation control**: Rotate content on narrow displays (0°/90°/180°/270°)
 - **Template-based config**: Clean initial setup with default layouts
 - **Power management**: Auto-clear device on exit
@@ -352,26 +373,48 @@ Perfect for essential controls that should work even when device is "OFF":
 3. Now this button works even in OFF mode
 4. **Use case**: Assign `System.DeviceOn` to a button so you can always turn device back on
 
-### Global Commands
-Add logging, notifications, or state management to all buttons at once:
+### Per-Page Global Commands
+Add logging, notifications, or state management to all buttons on a specific page:
 
-**Example 1 - Logging all button presses:**
-1. Settings → Global Commands → Touch Buttons
-2. Enable Suffix: ✓
-3. Suffix command: `echo "Touch button pressed at $(date)" >> /tmp/button_log.txt`
-4. Now every touch button press logs to file!
+**Example 1 - Page-specific logging:**
+1. Settings → Global Commands
+2. Select "Page 0" from dropdown
+3. Touch Buttons → Enable Suffix: ✓
+4. Suffix command: `echo "Page 0 button: $(date)" >> /tmp/page0_log.txt`
+5. Select "Page 1" from dropdown
+6. Configure different suffix: `echo "Page 1 button: $(date)" >> /tmp/page1_log.txt`
+7. Now each page logs to its own file!
 
-**Example 2 - Notifications:**
+**Example 2 - Page-specific notifications:**
 ```bash
-Prefix: notify-send "Action Starting"
-Suffix: notify-send "Action Complete"
+Page 0 - Gaming Controls:
+  Prefix: notify-send "Game Control"
+  
+Page 1 - Music Controls:
+  Prefix: notify-send "Music Action"
 ```
 
 **Example 3 - Volume knob with feedback:**
 ```bash
 Knob Left Suffix: notify-send "Volume Down"
 Knob Right Suffix: notify-send "Volume Up"
+Knob Press Prefix: notify-send "Mute Toggle"
 ```
+
+### Per-Page Wallpapers
+Set different backgrounds for different pages:
+
+**Example - Professional vs Personal Pages:**
+1. Settings → Wallpaper
+2. Select "Page 0" - Your work page
+3. Click "Select..." and choose a professional background
+4. Adjust opacity for readability
+5. Select "Page 1" - Your gaming page
+6. Click "Select..." and choose a gaming-themed background
+7. Each page now has its own unique look!
+
+**Remove Wallpaper:**
+- Simply click the "Remove" button to clear a page's wallpaper
 
 ### Vibration Patterns Guide
 - **Minimal**: AscendFast, ShortLower, Lowest

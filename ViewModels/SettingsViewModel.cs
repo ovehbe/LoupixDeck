@@ -17,6 +17,7 @@ public class SettingsViewModel : DialogViewModelBase<DialogResult>
     public ICommand SaveObsCommand { get; }
     public ICommand TestConnectionCommand { get; }
     public ICommand SelectImageButtonCommand { get; }
+    public ICommand RemoveWallpaperCommand { get; }
     public ICommand NavigateCommand { get; }
 
     private SKBitmap _wallpaperBitmap = null;
@@ -101,7 +102,357 @@ public class SettingsViewModel : DialogViewModelBase<DialogResult>
             WallpaperPositionX, WallpaperPositionY,
             SelectedWallpaperScalingOption);
 
-        Config.Wallpaper = scaledImage;
+        if (CurrentTouchButtonPageForWallpaper != null)
+        {
+            CurrentTouchButtonPageForWallpaper.Wallpaper = scaledImage;
+        }
+    }
+
+    // Wallpaper page selection
+    private int _selectedWallpaperPageIndex = 0;
+    public int SelectedWallpaperPageIndex
+    {
+        get => _selectedWallpaperPageIndex;
+        set
+        {
+            if (SetProperty(ref _selectedWallpaperPageIndex, value))
+            {
+                // Reset the temporary bitmap when switching pages
+                _wallpaperBitmap = CurrentTouchButtonPageForWallpaper?.Wallpaper;
+                
+                // Notify wallpaper properties to refresh
+                OnPropertyChanged(nameof(CurrentTouchButtonPageForWallpaper));
+                OnPropertyChanged(nameof(CurrentWallpaper));
+                OnPropertyChanged(nameof(WallpaperOpacity));
+            }
+        }
+    }
+
+    public TouchButtonPage CurrentTouchButtonPageForWallpaper => 
+        Config.TouchButtonPages.Count > _selectedWallpaperPageIndex ? Config.TouchButtonPages[_selectedWallpaperPageIndex] : null;
+
+    public SKBitmap CurrentWallpaper => CurrentTouchButtonPageForWallpaper?.Wallpaper;
+
+    public double WallpaperOpacity
+    {
+        get => CurrentTouchButtonPageForWallpaper?.WallpaperOpacity ?? 0.0;
+        set
+        {
+            if (CurrentTouchButtonPageForWallpaper != null)
+            {
+                CurrentTouchButtonPageForWallpaper.WallpaperOpacity = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Page selection for Global Commands
+    public ObservableCollection<string> AvailablePages { get; }
+
+    private int _selectedPageIndex = 0;
+    public int SelectedPageIndex
+    {
+        get => _selectedPageIndex;
+        set
+        {
+            if (SetProperty(ref _selectedPageIndex, value))
+            {
+                // Notify all global command properties to refresh
+                OnPropertyChanged(nameof(CurrentTouchButtonPage));
+                OnPropertyChanged(nameof(CurrentRotaryButtonPage));
+                OnPropertyChanged(nameof(TouchButtonPrefixEnabled));
+                OnPropertyChanged(nameof(TouchButtonPrefixCommand));
+                OnPropertyChanged(nameof(TouchButtonSuffixEnabled));
+                OnPropertyChanged(nameof(TouchButtonSuffixCommand));
+                OnPropertyChanged(nameof(SimpleButtonPrefixEnabled));
+                OnPropertyChanged(nameof(SimpleButtonPrefixCommand));
+                OnPropertyChanged(nameof(SimpleButtonSuffixEnabled));
+                OnPropertyChanged(nameof(SimpleButtonSuffixCommand));
+                OnPropertyChanged(nameof(KnobLeftPrefixEnabled));
+                OnPropertyChanged(nameof(KnobLeftPrefixCommand));
+                OnPropertyChanged(nameof(KnobLeftSuffixEnabled));
+                OnPropertyChanged(nameof(KnobLeftSuffixCommand));
+                OnPropertyChanged(nameof(KnobRightPrefixEnabled));
+                OnPropertyChanged(nameof(KnobRightPrefixCommand));
+                OnPropertyChanged(nameof(KnobRightSuffixEnabled));
+                OnPropertyChanged(nameof(KnobRightSuffixCommand));
+                OnPropertyChanged(nameof(KnobPressPrefixEnabled));
+                OnPropertyChanged(nameof(KnobPressPrefixCommand));
+                OnPropertyChanged(nameof(KnobPressSuffixEnabled));
+                OnPropertyChanged(nameof(KnobPressSuffixCommand));
+            }
+        }
+    }
+
+    public TouchButtonPage CurrentTouchButtonPage => 
+        Config.TouchButtonPages.Count > _selectedPageIndex ? Config.TouchButtonPages[_selectedPageIndex] : null;
+
+    public RotaryButtonPage CurrentRotaryButtonPage => 
+        Config.RotaryButtonPages.Count > _selectedPageIndex ? Config.RotaryButtonPages[_selectedPageIndex] : null;
+
+    // Wrapper properties for Touch Button global commands
+    public bool TouchButtonPrefixEnabled
+    {
+        get => CurrentTouchButtonPage?.TouchButtonPrefixEnabled ?? false;
+        set 
+        { 
+            if (CurrentTouchButtonPage != null) 
+            {
+                CurrentTouchButtonPage.TouchButtonPrefixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string TouchButtonPrefixCommand
+    {
+        get => CurrentTouchButtonPage?.TouchButtonPrefixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentTouchButtonPage != null) 
+            {
+                CurrentTouchButtonPage.TouchButtonPrefixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool TouchButtonSuffixEnabled
+    {
+        get => CurrentTouchButtonPage?.TouchButtonSuffixEnabled ?? false;
+        set 
+        { 
+            if (CurrentTouchButtonPage != null) 
+            {
+                CurrentTouchButtonPage.TouchButtonSuffixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string TouchButtonSuffixCommand
+    {
+        get => CurrentTouchButtonPage?.TouchButtonSuffixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentTouchButtonPage != null) 
+            {
+                CurrentTouchButtonPage.TouchButtonSuffixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Wrapper properties for Simple Button global commands
+    public bool SimpleButtonPrefixEnabled
+    {
+        get => CurrentRotaryButtonPage?.SimpleButtonPrefixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.SimpleButtonPrefixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string SimpleButtonPrefixCommand
+    {
+        get => CurrentRotaryButtonPage?.SimpleButtonPrefixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.SimpleButtonPrefixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool SimpleButtonSuffixEnabled
+    {
+        get => CurrentRotaryButtonPage?.SimpleButtonSuffixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.SimpleButtonSuffixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string SimpleButtonSuffixCommand
+    {
+        get => CurrentRotaryButtonPage?.SimpleButtonSuffixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.SimpleButtonSuffixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Wrapper properties for Knob Left global commands
+    public bool KnobLeftPrefixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobLeftPrefixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobLeftPrefixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobLeftPrefixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobLeftPrefixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobLeftPrefixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool KnobLeftSuffixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobLeftSuffixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobLeftSuffixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobLeftSuffixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobLeftSuffixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobLeftSuffixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Wrapper properties for Knob Right global commands
+    public bool KnobRightPrefixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobRightPrefixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobRightPrefixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobRightPrefixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobRightPrefixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobRightPrefixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool KnobRightSuffixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobRightSuffixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobRightSuffixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobRightSuffixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobRightSuffixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobRightSuffixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Wrapper properties for Knob Press global commands
+    public bool KnobPressPrefixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobPressPrefixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobPressPrefixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobPressPrefixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobPressPrefixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobPressPrefixCommand = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool KnobPressSuffixEnabled
+    {
+        get => CurrentRotaryButtonPage?.KnobPressSuffixEnabled ?? false;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobPressSuffixEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string KnobPressSuffixCommand
+    {
+        get => CurrentRotaryButtonPage?.KnobPressSuffixCommand ?? string.Empty;
+        set 
+        { 
+            if (CurrentRotaryButtonPage != null) 
+            {
+                CurrentRotaryButtonPage.KnobPressSuffixCommand = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public SettingsViewModel(LoupedeckConfig config, IObsController obs)
@@ -110,6 +461,7 @@ public class SettingsViewModel : DialogViewModelBase<DialogResult>
         SaveObsCommand = new RelayCommand(SaveObs);
         TestConnectionCommand = new RelayCommand(TestConnection);
         SelectImageButtonCommand = new AsyncRelayCommand(SelectImageButton_Click);
+        RemoveWallpaperCommand = new RelayCommand(RemoveWallpaper);
 
         NavigateCommand = new RelayCommand<SettingsView>(Navigate);
         CurrentView = SettingsView.General;
@@ -121,6 +473,13 @@ public class SettingsViewModel : DialogViewModelBase<DialogResult>
 
         _obs.Connected += ObsConnected;
         _obs.Disconnected += ObsDisconnected;
+
+        // Build the available pages list
+        AvailablePages = new ObservableCollection<string>();
+        for (int i = 0; i < Math.Max(Config.TouchButtonPages.Count, Config.RotaryButtonPages.Count); i++)
+        {
+            AvailablePages.Add($"Page {i}");
+        }
     }
 
     private void ObsConnected(object sender, EventArgs e)
@@ -180,6 +539,17 @@ public class SettingsViewModel : DialogViewModelBase<DialogResult>
         _wallpaperBitmap = SKBitmap.Decode(result);
 
         ApplyScaling();
+        OnPropertyChanged(nameof(CurrentWallpaper));
+    }
+
+    private void RemoveWallpaper()
+    {
+        if (CurrentTouchButtonPageForWallpaper != null)
+        {
+            CurrentTouchButtonPageForWallpaper.Wallpaper = null;
+            _wallpaperBitmap = null;
+            OnPropertyChanged(nameof(CurrentWallpaper));
+        }
     }
 
     private void Navigate(SettingsView settingsPage)
