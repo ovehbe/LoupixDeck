@@ -331,11 +331,19 @@ This fork adds comprehensive support for the **Razer Stream Controller**:
 ## 🎯 Usage Examples
 
 ### Per-Button Vibration Control
-1. Right-click any touch button in the GUI
+
+**⚠️ Important**: To use LoupixDeck's vibration control, you must first disable the device's built-in haptic feedback:
+1. Open the official **Loupedeck software** on a Windows computer
+2. Go to **Device Settings** → **Device Haptics**
+3. **Disable or turn off** the automatic haptic feedback
+4. This prevents conflicts between firmware vibration and LoupixDeck's per-button control
+
+**Once disabled in Loupedeck software:**
+1. Right-click any touch button in the LoupixDeck GUI
 2. Scroll down to "Vibration Settings"
 3. Check "Enable Vibration" to turn on haptic feedback
 4. Choose from 28 patterns: Short, Medium, Long, Buzz, Rumble, etc.
-5. **Tip**: Use `AscendFast` for center buttons to minimize vibration
+5. **Tip**: Use `ShortLower` for a quick, subtle feedback
 
 ### Enable When OFF Feature
 Perfect for essential controls that should work even when device is "OFF":

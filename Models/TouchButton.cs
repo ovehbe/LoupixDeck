@@ -273,7 +273,7 @@ public class TouchButton(int index) : LoupedeckButton
         }
     }
 
-    private bool _vibrationEnabled = true;
+    private bool _vibrationEnabled = false;
 
     public bool VibrationEnabled
     {
@@ -292,13 +292,10 @@ public class TouchButton(int index) : LoupedeckButton
     {
         get
         {
-            // If not explicitly set, return default based on button type
+            // If not explicitly set, return ShortLower as default for all buttons
             if (_vibrationPattern == 0)
             {
-                // Narrow buttons (12, 13) use ShortLower, center buttons (0-11) use AscendFast
-                return Index >= 12 
-                    ? LoupedeckDevice.Constants.VibrationPattern.ShortLower 
-                    : LoupedeckDevice.Constants.VibrationPattern.AscendFast;
+                return LoupedeckDevice.Constants.VibrationPattern.ShortLower;
             }
             return _vibrationPattern;
         }
