@@ -153,6 +153,149 @@ public class LoupedeckConfig : INotifyPropertyChanged
         }
     }
 
+    // Global Commands - Touch Buttons
+    private bool _touchButtonPrefixEnabled = false;
+    public bool TouchButtonPrefixEnabled
+    {
+        get => _touchButtonPrefixEnabled;
+        set
+        {
+            if (_touchButtonPrefixEnabled == value) return;
+            _touchButtonPrefixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string TouchButtonPrefixCommand { get; set; } = "";
+    
+    private bool _touchButtonSuffixEnabled = false;
+    public bool TouchButtonSuffixEnabled
+    {
+        get => _touchButtonSuffixEnabled;
+        set
+        {
+            if (_touchButtonSuffixEnabled == value) return;
+            _touchButtonSuffixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string TouchButtonSuffixCommand { get; set; } = "";
+
+    // Global Commands - Simple Buttons
+    private bool _simpleButtonPrefixEnabled = false;
+    public bool SimpleButtonPrefixEnabled
+    {
+        get => _simpleButtonPrefixEnabled;
+        set
+        {
+            if (_simpleButtonPrefixEnabled == value) return;
+            _simpleButtonPrefixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string SimpleButtonPrefixCommand { get; set; } = "";
+    
+    private bool _simpleButtonSuffixEnabled = false;
+    public bool SimpleButtonSuffixEnabled
+    {
+        get => _simpleButtonSuffixEnabled;
+        set
+        {
+            if (_simpleButtonSuffixEnabled == value) return;
+            _simpleButtonSuffixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string SimpleButtonSuffixCommand { get; set; } = "";
+
+    // Global Commands - Knobs (3 types: left, right, press)
+    private bool _knobLeftPrefixEnabled = false;
+    public bool KnobLeftPrefixEnabled
+    {
+        get => _knobLeftPrefixEnabled;
+        set
+        {
+            if (_knobLeftPrefixEnabled == value) return;
+            _knobLeftPrefixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobLeftPrefixCommand { get; set; } = "";
+    
+    private bool _knobLeftSuffixEnabled = false;
+    public bool KnobLeftSuffixEnabled
+    {
+        get => _knobLeftSuffixEnabled;
+        set
+        {
+            if (_knobLeftSuffixEnabled == value) return;
+            _knobLeftSuffixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobLeftSuffixCommand { get; set; } = "";
+    
+    private bool _knobRightPrefixEnabled = false;
+    public bool KnobRightPrefixEnabled
+    {
+        get => _knobRightPrefixEnabled;
+        set
+        {
+            if (_knobRightPrefixEnabled == value) return;
+            _knobRightPrefixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobRightPrefixCommand { get; set; } = "";
+    
+    private bool _knobRightSuffixEnabled = false;
+    public bool KnobRightSuffixEnabled
+    {
+        get => _knobRightSuffixEnabled;
+        set
+        {
+            if (_knobRightSuffixEnabled == value) return;
+            _knobRightSuffixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobRightSuffixCommand { get; set; } = "";
+    
+    private bool _knobPressPrefixEnabled = false;
+    public bool KnobPressPrefixEnabled
+    {
+        get => _knobPressPrefixEnabled;
+        set
+        {
+            if (_knobPressPrefixEnabled == value) return;
+            _knobPressPrefixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobPressPrefixCommand { get; set; } = "";
+    
+    private bool _knobPressSuffixEnabled = false;
+    public bool KnobPressSuffixEnabled
+    {
+        get => _knobPressSuffixEnabled;
+        set
+        {
+            if (_knobPressSuffixEnabled == value) return;
+            _knobPressSuffixEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    public string KnobPressSuffixCommand { get; set; } = "";
+
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

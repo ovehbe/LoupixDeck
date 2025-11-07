@@ -28,6 +28,7 @@ public class RazerStreamControllerController(
     private readonly string _offTemplatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "RazerOffConfig.json");
     
     private bool _isDeviceOff = false;
+    private int? _activeTouchButtonIndex = null; // Track which button is currently being touched
 
     public IPageManager PageManager => pageManager;
 
@@ -85,6 +86,19 @@ public class RazerStreamControllerController(
 
         // Start the device using the configuration
         deviceService.StartDevice(config.DevicePort, config.DeviceBaudrate, config.DeviceVid, config.DevicePid);
+
+        // Try to disable firmware automatic vibration
+        try
+        {
+            Console.WriteLine("Attempting to disable firmware automatic vibration...");
+            // Send vibration with pattern 0x00 (might disable automatic vibration)
+            deviceService.Device.Vibrate(0x00);
+            await Task.Delay(100);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not disable automatic vibration: {ex.Message}");
+        }
 
         // Apply OFF config first, then actual config (clean startup)
         await ApplyOffConfig();
@@ -211,79 +225,160 @@ public class RazerStreamControllerController(
         device.OnRotate += OnRotate;
     }
 
+    /// <summary>
+    /// Wraps a command with prefix and/or suffix if enabled
+    /// </summary>
+    private string WrapCommand(string originalCommand, bool prefixEnabled, string prefixCommand, bool suffixEnabled, string suffixCommand)
+    {
+        if (string.IsNullOrEmpty(originalCommand))
+            return originalCommand;
+
+        var result = originalCommand;
+        
+        if (prefixEnabled && !string.IsNullOrEmpty(prefixCommand))
+        {
+            result = $"{prefixCommand} && {result}";
+        }
+        
+        if (suffixEnabled && !string.IsNullOrEmpty(suffixCommand))
+        {
+            result = $"{result} && {suffixCommand}";
+        }
+        
+        return result;
+    }
+
     private void OnSimpleButtonPress(object sender, ButtonEventArgs e)
     {
         if (e.EventType != Constants.ButtonEventType.BUTTON_DOWN)
-            return;
-        
-        // Don't execute commands when device is OFF
-        if (_isDeviceOff)
             return;
 
         var button = config.SimpleButtons.FirstOrDefault(b => b.Id == e.ButtonId);
         if (button != null)
         {
+            // Don't execute commands when device is OFF, unless EnableWhenOff is true
+            if (_isDeviceOff && !button.EnableWhenOff)
+                return;
+                
             if (!string.IsNullOrEmpty(button.Command))
             {
-                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
+                var wrappedCommand = WrapCommand(
+                    button.Command,
+                    config.SimpleButtonPrefixEnabled,
+                    config.SimpleButtonPrefixCommand,
+                    config.SimpleButtonSuffixEnabled,
+                    config.SimpleButtonSuffixCommand
+                );
+                commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
             }
         }
         else
         {
             // Handle rotary button presses (all 6 knobs)
-            string command = null;
+            RotaryButton rotaryButton = null;
             switch (e.ButtonId)
             {
                 case Constants.ButtonType.KNOB_TL:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0];
                     break;
                 case Constants.ButtonType.KNOB_CL:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1];
                     break;
                 case Constants.ButtonType.KNOB_BL:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2];
                     break;
                 case Constants.ButtonType.KNOB_TR:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3];
                     break;
                 case Constants.ButtonType.KNOB_CR:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4];
                     break;
                 case Constants.ButtonType.KNOB_BR:
-                    command = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5].Command;
+                    rotaryButton = config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5];
                     break;
             }
             
-            if (!string.IsNullOrEmpty(command))
+            if (rotaryButton != null)
             {
-                commandService.ExecuteCommand(command).GetAwaiter().GetResult();
+                // Don't execute commands when device is OFF, unless EnableWhenOff is true
+                if (_isDeviceOff && !rotaryButton.EnableWhenOff)
+                    return;
+                    
+                if (!string.IsNullOrEmpty(rotaryButton.Command))
+                {
+                    var wrappedCommand = WrapCommand(
+                        rotaryButton.Command,
+                        config.KnobPressPrefixEnabled,
+                        config.KnobPressPrefixCommand,
+                        config.KnobPressSuffixEnabled,
+                        config.KnobPressSuffixCommand
+                    );
+                    commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
+                }
             }
         }
     }
 
     private void OnTouchButtonPress(object sender, TouchEventArgs e)
     {
-        if (e.EventType != Constants.TouchEventType.TOUCH_START)
-            return;
-        
         // Don't execute commands or vibrate when device is OFF
         if (_isDeviceOff)
             return;
 
-        foreach (var touch in e.Touches)
+        // Handle TOUCH_END - reset the active touch tracking
+        if (e.EventType == Constants.TouchEventType.TOUCH_END)
         {
-            var button = config.CurrentTouchButtonPage.TouchButtons.FindByIndex(touch.Target.Key);
-            if (button == null) continue;
+            // Always cancel any pending firmware-level vibration on release
+            deviceService.Device?.Vibrate(LoupedeckDevice.Constants.VibrationPattern.Off);
+            _activeTouchButtonIndex = null;
+            return;
+        }
+        
+        // Only process TOUCH_START events for button actions
+        if (e.EventType != Constants.TouchEventType.TOUCH_START)
+            return;
+        
+        // Only process the changed touch (the button that was just pressed)
+        if (e.ChangedTouch == null)
+            return;
+            
+        var touch = e.ChangedTouch;
+        var buttonIndex = touch.Target.Key;
+        
+        // Prevent multiple triggers while sliding - only process the first button touch
+        if (_activeTouchButtonIndex.HasValue && _activeTouchButtonIndex.Value == buttonIndex)
+            return;
+        
+        // If sliding to a different button, ignore it completely (no multi-press on slide)
+        if (_activeTouchButtonIndex.HasValue && _activeTouchButtonIndex.Value != buttonIndex)
+            return;
+        
+        // Mark this button as the active one
+        _activeTouchButtonIndex = buttonIndex;
+        
+        var button = config.CurrentTouchButtonPage.TouchButtons.FindByIndex(buttonIndex);
+        if (button == null)
+            return;
 
-            // Visual feedback: Flash the button
-            _ = ShowTouchFeedback(button);
-            
-            if (!string.IsNullOrEmpty(button.Command))
-            {
-                commandService.ExecuteCommand(button.Command).GetAwaiter().GetResult();
-            }
-            
-            deviceService.Device.Vibrate();
+        // Visual feedback: Flash the button
+        _ = ShowTouchFeedback(button);
+        
+        if (!string.IsNullOrEmpty(button.Command))
+        {
+            var wrappedCommand = WrapCommand(
+                button.Command,
+                config.TouchButtonPrefixEnabled,
+                config.TouchButtonPrefixCommand,
+                config.TouchButtonSuffixEnabled,
+                config.TouchButtonSuffixCommand
+            );
+            commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
+        }
+        
+        // Vibrate only if enabled for this button
+        if (button.VibrationEnabled)
+        {
+            deviceService.Device.Vibrate(button.VibrationPattern);
         }
     }
 
@@ -363,37 +458,38 @@ public class RazerStreamControllerController(
 
     private void OnRotate(object sender, RotateEventArgs e)
     {
-        // Don't execute commands when device is OFF
-        if (_isDeviceOff)
-            return;
-        
-        // Handle rotation for all 6 knobs
-        string command = e.ButtonId switch
+        // Get the rotary button first to check EnableWhenOff
+        RotaryButton rotaryButton = e.ButtonId switch
         {
-            Constants.ButtonType.KNOB_TL => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0].RotaryRightCommand,
-            Constants.ButtonType.KNOB_CL => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1].RotaryRightCommand,
-            Constants.ButtonType.KNOB_BL => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2].RotaryRightCommand,
-            Constants.ButtonType.KNOB_TR => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3].RotaryRightCommand,
-            Constants.ButtonType.KNOB_CR => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4].RotaryRightCommand,
-            Constants.ButtonType.KNOB_BR => e.Delta < 0
-                ? config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5].RotaryLeftCommand
-                : config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5].RotaryRightCommand,
+            Constants.ButtonType.KNOB_TL => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[0],
+            Constants.ButtonType.KNOB_CL => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[1],
+            Constants.ButtonType.KNOB_BL => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[2],
+            Constants.ButtonType.KNOB_TR => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[3],
+            Constants.ButtonType.KNOB_CR => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[4],
+            Constants.ButtonType.KNOB_BR => config.RotaryButtonPages[config.CurrentRotaryPageIndex].RotaryButtons[5],
             _ => null
         };
 
+        if (rotaryButton == null)
+            return;
+
+        // Don't execute commands when device is OFF, unless EnableWhenOff is true
+        if (_isDeviceOff && !rotaryButton.EnableWhenOff)
+            return;
+        
+        // Get the appropriate command based on rotation direction
+        string command = e.Delta < 0 ? rotaryButton.RotaryLeftCommand : rotaryButton.RotaryRightCommand;
+
         if (!string.IsNullOrEmpty(command))
         {
-            commandService.ExecuteCommand(command).GetAwaiter().GetResult();
+            // Wrap with appropriate prefix/suffix based on rotation direction
+            var wrappedCommand = e.Delta < 0
+                ? WrapCommand(command, config.KnobLeftPrefixEnabled, config.KnobLeftPrefixCommand,
+                    config.KnobLeftSuffixEnabled, config.KnobLeftSuffixCommand)
+                : WrapCommand(command, config.KnobRightPrefixEnabled, config.KnobRightPrefixCommand,
+                    config.KnobRightSuffixEnabled, config.KnobRightSuffixCommand);
+            
+            commandService.ExecuteCommand(wrappedCommand).GetAwaiter().GetResult();
         }
     }
 
@@ -834,4 +930,3 @@ public class RazerStreamControllerController(
         }
     }
 }
-

@@ -28,4 +28,17 @@ public class RotaryButton(int index,string rotaryLeftCommand, string rotaryRight
             OnPropertyChanged(nameof(RotaryRightCommand));
         }
     }
+
+    private bool _enableWhenOff = false;
+
+    public bool EnableWhenOff
+    {
+        get => _enableWhenOff;
+        set
+        {
+            if (value == _enableWhenOff) return;
+            _enableWhenOff = value;
+            OnPropertyChanged(nameof(EnableWhenOff));
+        }
+    }
 }

@@ -652,7 +652,7 @@ public class LoupedeckDevice
     /// <summary>
     /// Triggers a haptic vibration.
     /// </summary>
-    public void Vibrate(byte pattern = Constants.VibrationPattern.Short)
+    public void Vibrate(byte pattern = Constants.VibrationPattern.ShortLower)
     {
         SendNoResponse(Constants.Command.SET_VIBRATION, [pattern]);
     }

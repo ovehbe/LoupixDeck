@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using LoupixDeck.LoupedeckDevice;
 using LoupixDeck.Models;
+using LoupixDeck.Models.Converter;
 using LoupixDeck.Services;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels.Base;
@@ -14,6 +16,12 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
     public override void Initialize(TouchButton parameter)
     {
         ButtonData = parameter;
+        
+        // Set the selected vibration pattern based on ButtonData
+        if (ButtonData != null)
+        {
+            _selectedVibrationPattern = VibrationPatterns?.FirstOrDefault(p => p.Value == ButtonData.VibrationPattern);
+        }
     }
 
     private readonly IObsController _obs;
@@ -28,6 +36,24 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
 
     public ObservableCollection<MenuEntry> SystemCommandMenus { get; set; }
     public MenuEntry CurrentMenuEntry { get; set; }
+
+    public ObservableCollection<VibrationPatternItem> VibrationPatterns { get; set; }
+    
+    private VibrationPatternItem _selectedVibrationPattern;
+    public VibrationPatternItem SelectedVibrationPattern
+    {
+        get => _selectedVibrationPattern;
+        set
+        {
+            if (_selectedVibrationPattern == value) return;
+            _selectedVibrationPattern = value;
+            if (ButtonData != null && value != null)
+            {
+                ButtonData.VibrationPattern = value.Value;
+            }
+            OnPropertyChanged(nameof(SelectedVibrationPattern));
+        }
+    }
 
     private MenuEntry _elgatoKeyLightMenu;
 
@@ -47,6 +73,39 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         RemoveImageButtonCommand = new RelayCommand(RemoveImageButton_Click);
 
         SystemCommandMenus = new ObservableCollection<MenuEntry>();
+        
+        // Initialize vibration patterns
+        VibrationPatterns = new ObservableCollection<VibrationPatternItem>
+        {
+            new VibrationPatternItem("Short", Constants.VibrationPattern.Short),
+            new VibrationPatternItem("Short Low", Constants.VibrationPattern.ShortLow),
+            new VibrationPatternItem("Short Lower", Constants.VibrationPattern.ShortLower),
+            new VibrationPatternItem("Medium", Constants.VibrationPattern.Medium),
+            new VibrationPatternItem("Long", Constants.VibrationPattern.Long),
+            new VibrationPatternItem("Very Long", Constants.VibrationPattern.VeryLong),
+            new VibrationPatternItem("Low", Constants.VibrationPattern.Low),
+            new VibrationPatternItem("Lower", Constants.VibrationPattern.Lower),
+            new VibrationPatternItem("Lowest", Constants.VibrationPattern.Lowest),
+            new VibrationPatternItem("Descend Slow", Constants.VibrationPattern.DescendSlow),
+            new VibrationPatternItem("Descend Med", Constants.VibrationPattern.DescendMed),
+            new VibrationPatternItem("Descend Fast", Constants.VibrationPattern.DescendFast),
+            new VibrationPatternItem("Ascend Slow", Constants.VibrationPattern.AscendSlow),
+            new VibrationPatternItem("Ascend Med", Constants.VibrationPattern.AscendMed),
+            new VibrationPatternItem("Ascend Fast", Constants.VibrationPattern.AscendFast),
+            new VibrationPatternItem("Rev Slowest", Constants.VibrationPattern.RevSlowest),
+            new VibrationPatternItem("Rev Slow", Constants.VibrationPattern.RevSlow),
+            new VibrationPatternItem("Rev Med", Constants.VibrationPattern.RevMed),
+            new VibrationPatternItem("Rev Fast", Constants.VibrationPattern.RevFast),
+            new VibrationPatternItem("Rev Faster", Constants.VibrationPattern.RevFaster),
+            new VibrationPatternItem("Rev Fastest", Constants.VibrationPattern.RevFastest),
+            new VibrationPatternItem("Rise Fall", Constants.VibrationPattern.RiseFall),
+            new VibrationPatternItem("Buzz", Constants.VibrationPattern.Buzz),
+            new VibrationPatternItem("Rumble 1", Constants.VibrationPattern.Rumble1),
+            new VibrationPatternItem("Rumble 2", Constants.VibrationPattern.Rumble2),
+            new VibrationPatternItem("Rumble 3", Constants.VibrationPattern.Rumble3),
+            new VibrationPatternItem("Rumble 4", Constants.VibrationPattern.Rumble4),
+            new VibrationPatternItem("Rumble 5", Constants.VibrationPattern.Rumble5)
+        };
     }
 
     public Task InitializeAsync()

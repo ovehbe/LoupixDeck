@@ -27,18 +27,25 @@ It provides a highly customizable interface to assign commands, control external
   - Rotation support for narrow side displays (0°, 90°, 180°, 270°)
 - **Full input support**:
   - Touch input, rotary encoder turns/clicks, and physical button presses
-  - Haptic feedback (vibration) when touching buttons
+  - **Per-button vibration control**: Enable/disable and choose from 28 haptic patterns for each touch button
+  - **Smart vibration defaults**: Center buttons use minimal vibration, narrow buttons use short haptic feedback
   - **Visual touch feedback** with configurable color and opacity
+  - **Touch sliding prevention**: No accidental multi-triggers when finger slides across buttons
 - **Dynamic page system**:
   - Independent pages for touch and rotary buttons
   - Temporary on-screen display of the active page index
 - **Flexible command actions**:
   - Execute shell commands on button press
   - Send keyboard macros
+  - **Global Commands**: Add prefix/suffix commands to all buttons of the same type
+    - Touch buttons: Global pre/post actions for all touch buttons
+    - Simple buttons: Global pre/post actions for physical LED buttons
+    - Knobs: Separate prefix/suffix for left rotation, right rotation, and press
 - **Device configuration**:
   - Adjust display brightness
   - Set individual RGB colors for each physical button
   - Configurable touch feedback (enable/disable, color, opacity)
+  - **Enable When OFF**: Keep specific physical buttons/knobs functional even when device is OFF
 - **Persistent configuration**:
   - Save and restore full device layout and settings
   - Template-based initial configuration
@@ -281,6 +288,21 @@ This fork adds comprehensive support for the **Razer Stream Controller**:
 
 ### New Features
 - **Visual touch feedback**: Configurable flash animation on button press (Settings → General)
+- **Per-button vibration control**: 
+  - Enable/disable vibration for each touch button individually
+  - Choose from 28 different haptic patterns per button
+  - Smart defaults: Center buttons use minimal vibration (AscendFast), narrow buttons use short feedback (ShortLower)
+  - Settings accessible in touch button properties dialog
+- **Touch sliding prevention**: Prevents accidental command triggers when sliding finger across buttons
+- **Enable When OFF**: Keep specific physical buttons and knobs functional when device is in OFF mode
+  - Perfect for "Turn ON" buttons or window toggle controls
+  - Configurable per button in button settings
+- **Global Commands** (Settings → Global Commands):
+  - Add prefix/suffix commands to all buttons of each type
+  - **Touch Buttons**: Wrap all touch button commands with pre/post actions
+  - **Simple Buttons**: Global pre/post for physical LED buttons
+  - **Knobs**: Separate prefix/suffix for rotate left, rotate right, and button press
+  - Example uses: Logging, notifications, mode switching, state management
 - **Rotation control**: Rotate content on narrow displays (0°/90°/180°/270°)
 - **Template-based config**: Clean initial setup with default layouts
 - **Power management**: Auto-clear device on exit
@@ -303,6 +325,52 @@ This fork adds comprehensive support for the **Razer Stream Controller**:
 - `Services/SystemPowerService.cs` - Power event monitoring
 - `Templates/RazerDefaultConfig.json` - Initial configuration template
 - `Templates/RazerOffConfig.json` - Device clear state template
+
+---
+
+## 🎯 Usage Examples
+
+### Per-Button Vibration Control
+1. Right-click any touch button in the GUI
+2. Scroll down to "Vibration Settings"
+3. Check "Enable Vibration" to turn on haptic feedback
+4. Choose from 28 patterns: Short, Medium, Long, Buzz, Rumble, etc.
+5. **Tip**: Use `AscendFast` for center buttons to minimize vibration
+
+### Enable When OFF Feature
+Perfect for essential controls that should work even when device is "OFF":
+1. Right-click a physical button or knob
+2. Check "Enable When Device Is OFF"
+3. Now this button works even in OFF mode
+4. **Use case**: Assign `System.DeviceOn` to a button so you can always turn device back on
+
+### Global Commands
+Add logging, notifications, or state management to all buttons at once:
+
+**Example 1 - Logging all button presses:**
+1. Settings → Global Commands → Touch Buttons
+2. Enable Suffix: ✓
+3. Suffix command: `echo "Touch button pressed at $(date)" >> /tmp/button_log.txt`
+4. Now every touch button press logs to file!
+
+**Example 2 - Notifications:**
+```bash
+Prefix: notify-send "Action Starting"
+Suffix: notify-send "Action Complete"
+```
+
+**Example 3 - Volume knob with feedback:**
+```bash
+Knob Left Suffix: notify-send "Volume Down"
+Knob Right Suffix: notify-send "Volume Up"
+```
+
+### Vibration Patterns Guide
+- **Minimal**: AscendFast, ShortLower, Lowest
+- **Short**: Short, ShortLow, ShortLower  
+- **Standard**: Medium, Low, Lower
+- **Long**: Long, VeryLong
+- **Special**: Buzz, Rumble1-5, RiseFall, DescendSlow/Med/Fast
 
 ---
 

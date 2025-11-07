@@ -23,6 +23,12 @@
 					<Label Content="Button Color" />
 					<ccp:ColorPicker Name="ButtonColorPicker" Width="120" HorizontalAlignment="Left"
 									 Color="{Binding ButtonData.ButtonColor}" />
+					
+					<CheckBox Name="EnableWhenOffCheck" 
+							  Content="Enable When Device Is OFF" 
+							  IsChecked="{Binding ButtonData.EnableWhenOff}" 
+							  Margin="0,20,0,0"
+							  ToolTip.Tip="Keep this button functional even when device is in OFF mode" />
 				</StackPanel>
 				<StackPanel Grid.Column="1" Margin="20,20,0,0">
 					<Label Content="Command" />

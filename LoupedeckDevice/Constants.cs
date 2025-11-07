@@ -63,6 +63,7 @@ public static class Constants
 
     public static class VibrationPattern
     {
+        public const byte Off = 0x00;
         public const byte Short = 0x01;
         public const byte Medium = 0x0a;
         public const byte Long = 0x0f;

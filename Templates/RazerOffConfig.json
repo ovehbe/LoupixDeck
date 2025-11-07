@@ -383,7 +383,9 @@
           "ImageScale": 100,
           "Rotation": 0,
           "Command": null,
-          "IgnoreRefresh": false
+          "IgnoreRefresh": false,
+          "VibrationEnabled": true,
+          "VibrationPattern": 51
         },
         {
           "Index": 13,
@@ -404,7 +406,9 @@
           "ImageScale": 100,
           "Rotation": 0,
           "Command": null,
-          "IgnoreRefresh": false
+          "IgnoreRefresh": false,
+          "VibrationEnabled": true,
+          "VibrationPattern": 51
         }
       ]
     }

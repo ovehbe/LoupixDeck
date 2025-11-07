@@ -272,4 +272,41 @@ public class TouchButton(int index) : LoupedeckButton
             OnPropertyChanged(nameof(RenderedImage));
         }
     }
+
+    private bool _vibrationEnabled = true;
+
+    public bool VibrationEnabled
+    {
+        get => _vibrationEnabled;
+        set
+        {
+            if (value == _vibrationEnabled) return;
+            _vibrationEnabled = value;
+            OnPropertyChanged(nameof(VibrationEnabled));
+        }
+    }
+
+    private byte _vibrationPattern;
+
+    public byte VibrationPattern
+    {
+        get
+        {
+            // If not explicitly set, return default based on button type
+            if (_vibrationPattern == 0)
+            {
+                // Narrow buttons (12, 13) use ShortLower, center buttons (0-11) use AscendFast
+                return Index >= 12 
+                    ? LoupedeckDevice.Constants.VibrationPattern.ShortLower 
+                    : LoupedeckDevice.Constants.VibrationPattern.AscendFast;
+            }
+            return _vibrationPattern;
+        }
+        set
+        {
+            if (value == _vibrationPattern) return;
+            _vibrationPattern = value;
+            OnPropertyChanged(nameof(VibrationPattern));
+        }
+    }
 }

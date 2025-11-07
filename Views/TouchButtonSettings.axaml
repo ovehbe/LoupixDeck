@@ -159,7 +159,7 @@
                     <TextBlock Text="System Commands" FontWeight="Bold" Margin="0,0,0,5" />
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <TreeView Name="SystemCommandsTreeView" ItemsSource="{Binding SystemCommandMenus}"
-                                  SelectedItem="{Binding CurrentMenuEntry}" MaxHeight="350">
+                                  SelectedItem="{Binding CurrentMenuEntry}" MaxHeight="250">
                             <TreeView.DataTemplates>
                                 <TreeDataTemplate DataType="{x:Type local:Models.MenuEntry}"
                                                   ItemsSource="{Binding Children}">
@@ -168,6 +168,22 @@
                             </TreeView.DataTemplates>
                         </TreeView>
                     </ScrollViewer>
+                    
+                    <!-- Vibration Settings -->
+                    <TextBlock Text="Vibration Settings" FontWeight="Bold" Margin="0,15,0,5" />
+                    <CheckBox Name="VibrationEnabledCheck" 
+                              Content="Enable Vibration" 
+                              IsChecked="{Binding ButtonData.VibrationEnabled}" 
+                              Margin="0,0,0,5" />
+                    
+                    <StackPanel IsEnabled="{Binding ButtonData.VibrationEnabled}">
+                        <TextBlock Text="Pattern:" Margin="0,5,0,2" />
+                        <ComboBox Name="VibrationPatternCombo"
+                                  ItemsSource="{Binding VibrationPatterns}"
+                                  SelectedItem="{Binding SelectedVibrationPattern}"
+                                  Width="200"
+                                  HorizontalAlignment="Left" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
             <StackPanel Grid.Row="1" Orientation="Vertical">
