@@ -5,7 +5,7 @@ APP_NAME="LoupixDeck"
 DESCRIPTION="Loupedeck controller app"
 PUBLISH_DIR="$(pwd)/publish"
 EXEC_PATH="$PUBLISH_DIR/LoupixDeck"
-ICON_PATH="$PUBLISH_DIR/Publish/LoupixDeck.png"
+ICON_PATH="$PUBLISH_DIR/LoupixDeck.png"
 DESKTOP_FILE="$HOME/.local/share/applications/${APP_NAME}.desktop"
 
 echo "🚀 Publishing $APP_NAME..."
